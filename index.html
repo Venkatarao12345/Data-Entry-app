@@ -1,0 +1,1957 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clean Data Entry</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(148, 163, 184, 0.1);
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            outline: none;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            background-image:
+                radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Access Utility */
+        .hidden {
+            display: none !important;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .flex-col {
+            flex-direction: column;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .justify-center {
+            justify-content: center;
+        }
+
+        .gap-2 {
+            gap: 0.5rem;
+        }
+
+        .gap-4 {
+            gap: 1rem;
+        }
+
+        .w-full {
+            width: 100%;
+        }
+
+        .mb-2 {
+            margin-bottom: 0.5rem;
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem;
+        }
+
+        .mb-6 {
+            margin-bottom: 1.5rem;
+        }
+
+        .p-2 {
+            padding: 0.5rem;
+        }
+
+        .p-4 {
+            padding: 1rem;
+        }
+
+        .p-6 {
+            padding: 1.5rem;
+        }
+
+        /* Components */
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background-color: transparent;
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        .btn-danger:hover {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-ghost {
+            background-color: transparent;
+            color: var(--text-muted);
+        }
+
+        .btn-ghost:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+        }
+
+        .input {
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--card-border);
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+            width: 100%;
+            transition: border-color 0.2s;
+        }
+
+        .input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .label {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 1rem;
+            box-shadow: var(--glass-shadow);
+        }
+
+        /* Layouts */
+        #login-view {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-box {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        #dashboard-view {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            height: 100vh;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 1rem;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .panel {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .form-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .table-container {
+            flex: 1;
+            overflow: auto;
+            border-radius: 0.5rem;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        th {
+            background: rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 0;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            animation: slideIn 0.3s ease;
+            z-index: 2000;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Edit Mode Enhancements */
+        .editing-row {
+            background: rgba(59, 130, 246, 0.15) !important;
+            border-left: 3px solid var(--primary);
+        }
+
+        .input.is-dirty {
+            border-color: var(--warning) !important;
+            background: rgba(234, 179, 8, 0.05);
+        }
+
+        /* Standardized Icon Styles */
+        .btn-icon,
+        .btn-icon-neutral {
+            filter: grayscale(100%) opacity(0.7);
+            transition: all 0.2s ease;
+            border: none;
+            background: none;
+            cursor: pointer;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-icon:hover,
+        .btn-icon-neutral:hover {
+            filter: grayscale(100%) opacity(1) brightness(1.2);
+            /* Ensure no color leak */
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- App Container -->
+    <div id="app"></div>
+
+    <script>
+        /**
+         * CLEAN DATA ENTRY FORM - Single File Application
+         * Handles Auth, Dynamic Forms, Data Persistence (localStorage), and Export.
+         */
+
+        // --- CONSTANTS ---
+        const DB_KEYS = {
+            USERS: 'app_v8_users',
+            TABS: 'app_v8_tabs', // New Key for Tabs
+            SESSION: 'app_v8_session',
+            INSTALL_FLAG: 'app_v8_installed' // Flag to detect first run
+        };
+
+        const MAX_USERS = 20;
+
+        // --- SECURITY UTILS ---
+        const Security = {
+            // Basic obfuscation to prevent casual reading of source code strings
+            // Reverses Base64 + Rot13 combo (Not true encryption, but hides from plain sight)
+            deobfuscate(str) {
+                return atob(str).split('').map(c =>
+                    /[a-zA-Z]/.test(c) ? String.fromCharCode(c.charCodeAt(0) + (c.toLowerCase() < 'n' ? 13 : -13)) : c
+                ).join('');
+            },
+
+            async hash(str) {
+                const msgBuffer = new TextEncoder().encode(str);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            }
+        };
+
+        // Secrets (Obfuscated) -> admin / admin@123
+        const SECRETS = {
+            // "admin" -> Rot13 "nqzva" -> B64
+            ADMIN_ID: 'bnF6dmE=',
+            // "admin@123" -> Rot13 "nqzva@123" -> B64
+            ADMIN_PASS: 'bnF6dmFAMTIz',
+            // "Guest" -> Rot13 "Thrfg" -> B64
+            GUEST_ID: 'VGhyZmc=',
+            // "Guest@123" -> Rot13 "Thrfg@123" -> B64
+            GUEST_PASS: 'VGhyZmdAMTIz'
+        };
+
+        // --- STATE MANAGEMENT ---
+        const State = {
+            users: [],
+            tabs: [],
+            activeTabId: null,
+            currentUser: null,
+
+            // Getters/Setters to Proxy Active Tab
+            get activeTab() { return this.tabs.find(t => t.id === this.activeTabId); },
+            get schema() { return this.activeTab ? this.activeTab.schema : []; },
+            set schema(val) { if (this.activeTab) this.activeTab.schema = val; },
+            get data() { return this.activeTab ? this.activeTab.data : []; },
+            set data(val) { if (this.activeTab) this.activeTab.data = val; },
+
+            async init() {
+                // HARD-CODED PRESETS
+                this.adminIdRaw = Security.deobfuscate(SECRETS.ADMIN_ID);
+                this.guestIdRaw = Security.deobfuscate(SECRETS.GUEST_ID);
+
+                // --- FIRST-RUN RESET ---
+                const isInstalled = localStorage.getItem(DB_KEYS.INSTALL_FLAG);
+                if (!isInstalled) {
+                    console.log("First Run: Cleaning...");
+                    localStorage.clear();
+
+                    // Create Guest User ONLY
+                    const guestPass = Security.deobfuscate(SECRETS.GUEST_PASS);
+                    const guestHash = await Security.hash(guestPass);
+
+                    // Note: Default Admin is NOT added to this.users (Persistence Rule)
+                    this.users = [
+                        { id: this.guestIdRaw, password: guestHash, role: 'user', createdBy: 'system' }
+                    ];
+                    this.saveUsers();
+                    localStorage.setItem(DB_KEYS.INSTALL_FLAG, 'true');
+
+                    // Default Tab
+                    this.tabs = [{ id: 'tab_default', name: 'Sheet 1', schema: [{ id: 'name', label: 'Name', type: 'text' }], data: [] }];
+                    this.activeTabId = 'tab_default';
+                    this.saveTabs();
+
+                } else {
+                    // Normal Load
+                    const storedUsers = localStorage.getItem(DB_KEYS.USERS);
+                    this.users = storedUsers ? JSON.parse(storedUsers) : [];
+
+                    // Load Tabs or Migrate
+                    const storedTabs = localStorage.getItem(DB_KEYS.TABS);
+                    if (storedTabs) {
+                        this.tabs = JSON.parse(storedTabs);
+                        this.activeTabId = this.tabs.length > 0 ? this.tabs[0].id : null;
+                    }
+                }
+
+                // Check Session
+                const session = sessionStorage.getItem(DB_KEYS.SESSION);
+                if (session) {
+                    this.currentUser = JSON.parse(session);
+                }
+            },
+
+            saveUsers() { localStorage.setItem(DB_KEYS.USERS, JSON.stringify(this.users)); },
+            saveTabs() { localStorage.setItem(DB_KEYS.TABS, JSON.stringify(this.tabs)); },
+            saveSchema() { this.saveTabs(); },
+            saveData() { this.saveTabs(); },
+
+            // --- TAB MANAGEMENT ---
+            addTab(name) {
+                if (this.tabs.some(t => t.name.toLowerCase() === name.toLowerCase())) {
+                    alert('A tab with this name already exists. Please choose a unique name.');
+                    return;
+                }
+                const newTab = { id: 'tab_' + Date.now(), name: name, schema: [], data: [] };
+                this.tabs.push(newTab);
+                this.switchTab(newTab.id);
+            },
+
+            deleteTab(id) {
+                if (this.tabs.length <= 1) {
+                    alert('Cannot delete the last existing sheet.');
+                    return;
+                }
+                if (!confirm(`Are you sure you want to delete "${this.activeTab.name}"? This cannot be undone.`)) return;
+
+                const idx = this.tabs.findIndex(t => t.id === id);
+                if (idx !== -1) {
+                    this.tabs.splice(idx, 1);
+                    const nextTab = this.tabs[idx - 1] || this.tabs[0];
+                    this.switchTab(nextTab.id);
+                }
+            },
+
+            switchTab(id) {
+                this.activeTabId = id;
+                this.selectedRows.clear();
+                this.saveTabs();
+                Router.render();
+            },
+
+            renameTab(name) {
+                if (this.activeTab) {
+                    if (this.tabs.some(t => t.id !== this.activeTabId && t.name.toLowerCase() === name.toLowerCase())) {
+                        alert('A tab with this name already exists.');
+                        return;
+                    }
+                    this.activeTab.name = name;
+                    this.saveTabs();
+                    Router.render();
+                }
+            },
+
+            async login(userId, password, selectedRole) {
+                const hash = await Security.hash(password);
+
+                // 1. CUSTOM ADMIN / USER CHECK (LocalStorage)
+                // Case-insensitive ID check
+                const userMatch = this.users.find(u => u.id.toLowerCase() === userId.toLowerCase());
+
+                if (userMatch) {
+                    if (userMatch.password === hash) {
+                        if (userMatch.role !== selectedRole) {
+                            return { success: false, error: `Account exists but is not an ${selectedRole}` };
+                        }
+                        this.currentUser = { ...userMatch, adminType: 'custom' }; // Mark as Custom
+                        sessionStorage.setItem(DB_KEYS.SESSION, JSON.stringify(this.currentUser));
+                        return { success: true };
+                    } else {
+                        return { success: false, error: 'Incorrect Password.' };
+                    }
+                }
+
+                // 2. DEFAULT ADMIN FALLBACK (Secrets)
+                // Only if looking for Admin and not found in custom users
+                if (selectedRole === 'admin') {
+                    // Check Hardcoded Default Admin
+                    const defaultAdminId = Security.deobfuscate(SECRETS.ADMIN_ID);
+                    if (userId === defaultAdminId) {
+                        const defaultAdminPass = Security.deobfuscate(SECRETS.ADMIN_PASS);
+                        const defaultHash = await Security.hash(defaultAdminPass);
+
+                        if (hash === defaultHash) {
+                            this.currentUser = {
+                                id: userId,
+                                role: 'admin',
+                                adminType: 'default', // Mark as Default
+                                createdBy: 'system'
+                            };
+                            sessionStorage.setItem(DB_KEYS.SESSION, JSON.stringify(this.currentUser));
+                            return { success: true };
+                        } else {
+                            return { success: false, error: 'Incorrect Password.' };
+                        }
+                    }
+                }
+
+                return { success: false, error: 'User ID Not Found.' };
+            },
+
+            logout() {
+                this.currentUser = null;
+                sessionStorage.removeItem(DB_KEYS.SESSION);
+                Router.render();
+            },
+
+            async addUser(newId, newPassword) {
+                if (this.currentUser.role !== 'admin') throw new Error("Unauthorized");
+
+                // Partitioning Logic: Count users created by THIS admin
+                const myUsers = this.users.filter(u => u.createdBy === this.currentUser.id && u.role === 'user');
+                if (myUsers.length >= 20) throw new Error("Your max user limit (20) reached.");
+
+                if (this.users.find(u => u.id.toLowerCase() === newId.toLowerCase())) throw new Error("User ID already exists.");
+
+                const hash = await Security.hash(newPassword);
+                // Tag user with creating admin ID
+                this.users.push({ id: newId, password: hash, role: 'user', createdBy: this.currentUser.id });
+                this.saveUsers();
+            },
+
+            async addCustomAdmin(newId, newPassword) {
+                if (this.currentUser.role !== 'admin') throw new Error("Unauthorized");
+
+                // Prevent creating an admin with the same ID as the hardcoded default (confusion avoidance)
+                const defaultAdminId = Security.deobfuscate(SECRETS.ADMIN_ID);
+                if (newId.toLowerCase() === defaultAdminId.toLowerCase()) {
+                    throw new Error("Cannot create a Custom Admin with the Default Admin ID.");
+                }
+
+                if (this.users.find(u => u.id.toLowerCase() === newId.toLowerCase())) throw new Error("User ID already exists.");
+
+                const hash = await Security.hash(newPassword);
+                // Custom Admin is stored in localStorage
+                this.users.push({
+                    id: newId,
+                    password: hash,
+                    role: 'admin',
+                    adminType: 'custom',
+                    createdBy: this.currentUser.id
+                });
+                this.saveUsers();
+            },
+
+            deleteUser(userId) {
+                if (this.currentUser.role !== 'admin') throw new Error("Unauthorized");
+
+                // 1. HARD-CODED PRIMARY ADMIN - NOT DELETABLE
+                if (userId === Security.deobfuscate(SECRETS.ADMIN_ID)) throw new Error("Default Admin cannot be deleted.");
+
+                const user = this.users.find(u => u.id === userId);
+
+                // Allow deleting Custom Admins if created by self (or if we are super admin? 
+                // Requirement says "Never reset custom admin data", implies care.
+                // But generally an Admin should be able to clean up if they created it?
+                // For now, allow deleting if it's in the list and check ownership/role.
+                if (!user) throw new Error("User not found.");
+
+                // Self-deletion check
+                if (user.id === this.currentUser.id) throw new Error("Cannot delete yourself.");
+
+                // Only allow deleting OWN users/admins
+                // If I am Default Admin, I likely 'created' everyone or at least can manage everyone?
+                // The prompt says "Authenticate custom admins first...". 
+                // Let's assume strict ownership for safety.
+                if (user.createdBy && user.createdBy !== this.currentUser.id) {
+                    // Exception: If I am Default Admin, maybe I can delete anyone? 
+                    // For now, strict ownership.
+                    throw new Error("Cannot delete users created by another Admin.");
+                }
+
+                this.users = this.users.filter(u => u.id !== userId);
+                this.saveUsers();
+            },
+
+            async updateUserPassword(userId, newPassword) {
+                // 1. DEFAULT ADMIN - IMMUTABLE
+                // If 'adminType' is explicitly default, block.
+                if (this.currentUser.adminType === 'default' && userId === this.currentUser.id) {
+                    throw new Error("Default Admin password cannot be changed.");
+                }
+
+                // Double check target ID against Hardcoded Default
+                const defaultAdminId = Security.deobfuscate(SECRETS.ADMIN_ID);
+                if (userId === defaultAdminId) {
+                    throw new Error("Default Admin password is immutable.");
+                }
+
+                // Allow Admin to change own password OR their own users' passwords
+                if (userId !== this.currentUser.id) {
+                    const user = this.users.find(u => u.id === userId);
+                    if (!user || (user.createdBy !== this.currentUser.id)) throw new Error("Unauthorized: Can only change own or own user passwords.");
+                }
+
+                const hash = await Security.hash(newPassword);
+                const idx = this.users.findIndex(u => u.id === userId);
+                if (idx !== -1) {
+                    this.users[idx].password = hash;
+                    // If updating self, update current session too
+                    if (userId === this.currentUser.id) {
+                        this.currentUser.password = hash;
+                        sessionStorage.setItem(DB_KEYS.SESSION, JSON.stringify(this.currentUser));
+                    }
+                    this.saveUsers();
+                    return true;
+                }
+                return false;
+            },
+
+            async updateAdminId(newId) {
+                if (this.currentUser.role !== 'admin') throw new Error("Unauthorized");
+
+                // 1. DEFAULT ADMIN - IMMUTABLE
+                if (this.currentUser.adminType === 'default') {
+                    throw new Error("Default Admin ID cannot be changed.");
+                }
+
+                if (this.users.find(u => u.id.toLowerCase() === newId.toLowerCase())) throw new Error("ID already taken.");
+
+                const oldId = this.currentUser.id;
+
+                // 1. Update Admin Record
+                const adminIdx = this.users.findIndex(u => u.id === oldId);
+                if (adminIdx === -1) throw new Error("Admin record not found.");
+
+                this.users[adminIdx].id = newId;
+
+                // 2. Migrate Child Users
+                let migratedCount = 0;
+                this.users.forEach(u => {
+                    if (u.createdBy === oldId) {
+                        u.createdBy = newId;
+                        migratedCount++;
+                    }
+                });
+
+                // 3. Update Session
+                this.currentUser.id = newId;
+                sessionStorage.setItem(DB_KEYS.SESSION, JSON.stringify(this.currentUser));
+
+                this.saveUsers();
+                return migratedCount;
+            },
+
+            // -- SELECTION METHODS --
+            selectedRows: new Set(),
+
+            toggleSelection(index) {
+                if (this.selectedRows.has(index)) this.selectedRows.delete(index);
+                else this.selectedRows.add(index);
+                Router.render();
+            },
+
+            deleteSelected() {
+                // Indices sort desc to avoid shifting issues
+                const indices = Array.from(this.selectedRows).sort((a, b) => b - a);
+                indices.forEach(idx => this.data.splice(idx, 1));
+                this.selectedRows.clear();
+                this.saveData();
+                Router.render();
+            },
+
+            clearAll() {
+                this.data = [];
+                this.selectedRows.clear();
+                this.saveData();
+                Router.render();
+            },
+
+            addColumn(label, type, options = {}) {
+                if (this.schema.some(c => c.label.trim().toLowerCase() === label.trim().toLowerCase())) {
+                    throw new Error(`Column "${label}" already exists. Please use a different name.`);
+                }
+                const id = label.toLowerCase().replace(/[^a-z0-9]/g, '_') + '_' + Date.now().toString().slice(-4);
+                this.schema.push({ id, label, type, options });
+                this.saveSchema();
+                Router.render();
+            },
+
+            updateColumn(colId, newLabel, newType, newOptions) {
+                const idx = this.schema.findIndex(c => c.id === colId);
+                if (idx !== -1) {
+                    if (this.schema.some((c, i) => i !== idx && c.label.trim().toLowerCase() === newLabel.trim().toLowerCase())) {
+                        throw new Error(`Column "${newLabel}" already exists.`);
+                    }
+                    this.schema[idx] = { id: colId, label: newLabel, type: newType, options: newOptions };
+                    this.saveSchema();
+                    Router.render();
+                }
+            },
+
+            reorderColumns(fromIndex, toIndex) {
+                const item = this.schema.splice(fromIndex, 1)[0];
+                this.schema.splice(toIndex, 0, item);
+                this.saveSchema();
+                Router.render();
+            },
+
+            deleteColumn(colId) {
+                this.schema = this.schema.filter(c => c.id !== colId);
+                this.saveSchema();
+                Router.render();
+            },
+
+            addEntry(entryData) {
+                // Validation: Unique Constraints
+                this.schema.forEach(col => {
+                    if (col.options?.unique) {
+                        const val = entryData[col.id];
+                        if ((val || val === 0) && this.data.some(d => d[col.id] === val)) {
+                            throw new Error(`Duplicate value found for "${col.label}"`);
+                        }
+                    }
+                });
+
+                const newRecord = { id: Date.now(), ...entryData };
+                this.data.push(newRecord);
+                this.saveData();
+                Router.render();
+            },
+
+            deleteEntry(recordId) {
+                this.data = this.data.filter(d => d.id !== recordId);
+                this.saveData();
+                Router.render();
+            },
+
+            // --- UPDATE ENTRY (Reuse Validation) ---
+            updateEntry(id, entryData) {
+                // Validation: Unique Constraints (Exclude Self)
+                this.schema.forEach(col => {
+                    if (col.options?.unique) {
+                        const val = entryData[col.id];
+                        // Check if ANYOTHER record has this value
+                        if ((val || val === 0) && this.data.some(d => d.id !== id && d[col.id] === val)) {
+                            throw new Error(`Duplicate value found for "${col.label}"`);
+                        }
+                    }
+                });
+
+                const idx = this.data.findIndex(d => d.id === id);
+                if (idx === -1) throw new Error("Record not found.");
+
+                // Update (Preserve ID and Metadata)
+                this.data[idx] = { ...this.data[idx], ...entryData };
+                this.selectedRows.clear(); // Reset Selection
+                this.saveData();
+                Router.render();
+            },
+
+            exportCSV() {
+                if (this.schema.length === 0) return;
+                const headers = this.schema.map(col => col.label).join(',');
+                const rows = this.data.map(row =>
+                    this.schema.map(col => {
+                        const val = row[col.id] || '';
+                        return `"${val}"`;
+                    }).join(',')
+                );
+                const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].join("\n");
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `${this.activeTab.name || 'data'}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            },
+
+            exportJSON() {
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.data, null, 2));
+                const link = document.createElement("a");
+                link.setAttribute("href", dataStr);
+                link.setAttribute("download", `${this.activeTab.name || 'data'}.json`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            },
+
+            // --- PDF EXPORT HANDLER (Modular Structure) ---
+            exportPDF() {
+                if (this.data.length === 0) {
+                    alert('No records to export.');
+                    return;
+                }
+
+                // Minimal Print-to-PDF Implementation
+                const printWindow = window.open('', '', 'height=600,width=800');
+                if (!printWindow) return; // Blocked popup
+
+                const headers = this.schema.map(c => `<th>${c.label}</th>`).join('');
+                const rows = this.data.map(r =>
+                    `<tr>${this.schema.map(c => `<td>${Router.formatValue(r[c.id], c)}</td>`).join('')}</tr>`
+                ).join('');
+
+                printWindow.document.write(`
+                    <html>
+                    <head>
+                        <title>${this.activeTab.name} - Export</title>
+                        <style>
+                            body { font-family: sans-serif; padding: 20px; }
+                            table { width: 100%; border-collapse: collapse; }
+                            th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+                            th { background: #f0f0f0; }
+                            h1 { font-size: 1.5rem; margin-bottom: 1rem; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>${this.activeTab.name}</h1>
+                        <table>
+                            <thead><tr>${headers}</tr></thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+                    </body>
+                    </html>
+                `);
+
+                printWindow.document.close();
+                printWindow.focus();
+
+                // Delay print slightly to ensure render
+                setTimeout(() => {
+                    printWindow.print();
+                    printWindow.close();
+                }, 500);
+            }
+        };
+
+        // --- UI RENDERER ---
+        const Router = {
+            app: document.getElementById('app'),
+
+            async init() {
+                await State.init();
+
+                // Security: Disable Context Menu
+                document.addEventListener('contextmenu', event => event.preventDefault());
+
+                this.render();
+            },
+
+            render() {
+                this.app.innerHTML = '';
+                if (!State.currentUser) {
+                    this.renderLogin();
+                } else {
+                    this.renderDashboard();
+                }
+            },
+
+            // Helper for Formatting
+            formatValue(val, col) {
+                if (!val && val !== 0) return '-';
+                const opts = col.options || {};
+
+                if (col.type === 'number') {
+                    if (opts.numFormat === 'currency') {
+                        const decimals = opts.decimalPlaces !== undefined && opts.decimalPlaces !== '' ? parseInt(opts.decimalPlaces) : 2;
+                        return new Intl.NumberFormat('en-US', {
+                            style: 'currency',
+                            currency: opts.currency || 'USD',
+                            minimumFractionDigits: decimals,
+                            maximumFractionDigits: decimals
+                        }).format(val);
+                    } else if (opts.numFormat === 'decimal') {
+                        const decimals = opts.decimalPlaces !== undefined && opts.decimalPlaces !== '' ? parseInt(opts.decimalPlaces) : 2;
+                        return new Intl.NumberFormat('en-US', {
+                            minimumFractionDigits: decimals,
+                            maximumFractionDigits: decimals
+                        }).format(val);
+                    }
+                } else if (col.type === 'date') {
+                    const d = new Date(val);
+                    if (isNaN(d.getTime())) return val;
+
+                    if (opts.dateFormat === 'short') return d.toLocaleDateString(); // 1/31/2026
+                    if (opts.dateFormat === 'long') return d.toLocaleDateString(undefined, { dateStyle: 'long' }); // January 31, 2026
+                }
+                return val;
+            },
+
+            // Helper for Input Parsing
+            handleInputBlur(e, col) {
+                const opts = col.options || {};
+
+                // Auto Trim
+                if (col.type === 'text' && opts.autoTrim) {
+                    e.target.value = e.target.value.trim();
+                }
+
+                if (col.type === 'text' && opts.casing) {
+                    if (opts.casing === 'upper') e.target.value = e.target.value.toUpperCase();
+                    if (opts.casing === 'lower') e.target.value = e.target.value.toLowerCase();
+                    if (opts.casing === 'title') {
+                        e.target.value = e.target.value.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+                    }
+                }
+            },
+
+            // Table DnD Handlers
+            handleDragStart(e, index) {
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', index);
+                e.target.style.opacity = '0.5';
+            },
+
+            handleDragOver(e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                return false;
+            },
+
+            handleDrop(e, toIndex) {
+                e.stopPropagation();
+                const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                if (fromIndex !== toIndex) {
+                    State.reorderColumns(fromIndex, toIndex);
+                }
+                return false;
+            },
+
+            renderLogin() {
+                const container = document.createElement('div');
+                container.id = 'login-view';
+
+                // Toggle State
+                let activeRole = 'user'; // default
+
+                const updateForm = () => {
+                    const box = container.querySelector('.login-box');
+                    box.innerHTML = `
+                        <div class="mb-4 text-center">
+                            <h2 style="font-weight:700; font-size: 1.5rem; margin-bottom: 0.5rem;">Welcome Back</h2>
+                            <p style="color:var(--text-muted)">Clean Data Entry Portal</p>
+                        </div>
+
+                        <!-- Role Toggles -->
+                        <div class="flex gap-2 mb-6 p-1" style="background:rgba(0,0,0,0.3); border-radius:0.5rem;">
+                            <button id="tabUser" type="button" class="btn w-full ${activeRole === 'user' ? 'btn-primary' : 'btn-ghost'}" style="${activeRole !== 'user' ? 'color:var(--text-muted);' : ''}">User</button>
+                            <button id="tabAdmin" type="button" class="btn w-full ${activeRole === 'admin' ? 'btn-primary' : 'btn-ghost'}" style="${activeRole !== 'admin' ? 'color:var(--text-muted);' : ''}">Admin</button>
+                        </div>
+
+                        <form id="loginForm" class="flex flex-col gap-4">
+                            <div>
+                                <label class="label">User ID (Unique)</label>
+                                <input type="text" name="userid" class="input" placeholder="Enter ${activeRole === 'admin' ? 'Admin' : 'User'} ID" required>
+                            </div>
+                            <div style="position:relative;">
+                                <label class="label">Password</label>
+                                <input type="password" name="password" id="passInput" class="input" placeholder="••••••••" required style="padding-right: 40px;">
+                                <button type="button" id="togglePass" class="btn-icon" style="position:absolute; right:10px; top:32px;">
+                                    👁️
+                                </button>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-full" style="margin-top: 1rem;">Login as ${activeRole === 'admin' ? 'Admin' : 'User'}</button>
+                        </form>
+                        <div id="loginError" style="color: var(--danger); font-size: 0.9rem; margin-top: 1rem; text-align: center; display: none;"></div>
+                    `;
+
+                    // Bind Events
+                    box.querySelector('#tabUser').onclick = () => { activeRole = 'user'; updateForm(); };
+                    box.querySelector('#tabAdmin').onclick = () => { activeRole = 'admin'; updateForm(); };
+
+                    // Show/Hide Password
+                    const passInput = box.querySelector('#passInput');
+                    const toggleBtn = box.querySelector('#togglePass');
+                    toggleBtn.onclick = () => {
+                        if (passInput.type === 'password') {
+                            passInput.type = 'text';
+                            toggleBtn.innerText = '🔒'; // Icon change
+                        } else {
+                            passInput.type = 'password';
+                            toggleBtn.innerText = '👁️';
+                        }
+                    };
+
+                    box.querySelector('#loginForm').addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const uid = e.target.userid.value;
+                        const pass = e.target.password.value;
+                        const result = await State.login(uid, pass, activeRole);
+
+                        if (result.success) {
+                            this.render();
+                        } else {
+                            const err = box.querySelector('#loginError');
+                            err.style.display = 'block';
+                            err.innerText = result.error;
+                        }
+                    });
+                };
+
+                const card = document.createElement('div');
+                card.className = 'card login-box p-6';
+                container.appendChild(card);
+                this.app.appendChild(container);
+
+                updateForm();
+            },
+
+            renderDashboard() {
+                const isAdmin = State.currentUser.role === 'admin';
+
+                const container = document.createElement('div');
+                container.id = 'dashboard-view';
+
+                // HEADER & TABS
+                const header = document.createElement('header');
+                const tabsHtml = State.tabs.map(tab => `
+                    <button class="btn ${tab.id === State.activeTabId ? 'btn-primary' : 'btn-ghost'}" data-tab-id="${tab.id}" style="white-space:nowrap; padding: 0.25rem 0.75rem; font-size: 0.85rem;">
+                        ${tab.name}
+                    </button>
+                `).join('');
+
+                header.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div style="width:40px; height:40px; background:linear-gradient(135deg, var(--primary), #8b5cf6); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.2rem;">${State.currentUser.id[0].toUpperCase()}</div>
+                        <div>
+                            <h3 style="font-weight:600;">${State.currentUser.id}</h3>
+                            <span style="font-size:0.8rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">${State.currentUser.role}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-4">
+                        <div class="flex gap-1 items-center overflow-x-auto" style="max-width: 600px;">
+                            ${tabsHtml}
+                            <button id="btnAddTab" class="btn btn-secondary" style="padding: 0.25rem 0.75rem; font-size: 0.85rem;" title="New Sheet">+ New</button>
+                            ${State.tabs.length > 1 ? `<button id="btnDelTab" class="btn-icon" style="padding: 0.25rem; font-size: 1.1rem; margin-left:0.5rem;" title="Delete Current Sheet">🗑️</button>` : ''}
+                        </div>
+                        <div class="flex gap-2" style="border-left: 1px solid var(--card-border); padding-left: 1rem;">
+                            ${isAdmin ? `<button id="btnAdminSettings" class="btn btn-secondary">Settings</button>` : ''}
+                            <button id="btnLogout" class="btn btn-danger">Logout</button>
+                        </div>
+                    </div>
+                `;
+
+                // Bind Header Events
+                header.querySelectorAll('button[data-tab-id]').forEach(btn => {
+                    btn.onclick = () => {
+                        // TAB GUARD
+                        if (State.selectedRows.size === 1) {
+                            // Check for dirty inputs? Or just generally warn if in edit mode?
+                            // Simple Guard: If in edit mode, warn.
+                            const form = document.getElementById('dataEntryForm');
+                            // Check if dirty class exists or just blindly warn
+                            const isDirty = form && form.querySelector('.is-dirty');
+                            if (isDirty) {
+                                if (!confirm("You have unsaved changes. Discard them and switch tabs?")) return;
+                                State.selectedRows.clear(); // Discard
+                            } else {
+                                // If not dirty but in edit mode, just clear selection silently? 
+                                // Or safer to just clear.
+                                State.selectedRows.clear();
+                            }
+                        }
+                        State.switchTab(btn.dataset.tabId);
+                    };
+                });
+                header.querySelector('#btnAddTab').onclick = () => {
+                    let name = prompt("Enter Tab Name:", `Sheet ${State.tabs.length + 1}`);
+                    while (name && State.tabs.some(t => t.name.toLowerCase() === name.trim().toLowerCase())) {
+                        alert('Name already taken. Please try again.');
+                        name = prompt("Enter Tab Name:", `Sheet ${State.tabs.length + 1}`);
+                    }
+                    if (name && name.trim()) State.addTab(name.trim());
+                };
+                if (header.querySelector('#btnDelTab')) {
+                    header.querySelector('#btnDelTab').onclick = () => State.deleteTab(State.activeTabId);
+                }
+                header.querySelector('#btnLogout').addEventListener('click', () => State.logout());
+                if (isAdmin) {
+                    header.querySelector('#btnAdminSettings').addEventListener('click', () => this.openAdminSettings());
+                }
+
+                // MAIN CONTENT
+                const main = document.createElement('div');
+                main.className = 'main-grid';
+
+                // -- LEFT PANEL: FORM --
+                const leftPanel = document.createElement('div');
+                leftPanel.className = 'card panel p-4';
+
+                const formHeader = document.createElement('div');
+                formHeader.className = 'panel-header';
+                formHeader.style.marginBottom = '0.5rem';
+                formHeader.innerHTML = `
+                    <div class="flex items-center gap-2">
+                         <span style="font-weight:bold; font-size:1.1rem; color:var(--primary);">${State.activeTab.name}</span>
+                         <button id="btnRenameTab" class="btn-icon" title="Rename Tab" style="font-size:0.9rem;">✏️</button>
+                    </div>
+                    <button class="btn btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.8rem;" id="btnAddCol">+ Column</button>
+                `;
+
+                formHeader.querySelector('#btnAddCol').addEventListener('click', () => this.openColumnModal());
+                formHeader.querySelector('#btnRenameTab').onclick = () => {
+                    let newName = prompt("Rename Tab:", State.activeTab.name);
+                    // Simple loop check for rename
+                    while (newName && State.tabs.some(t => t.id !== State.activeTabId && t.name.toLowerCase() === newName.trim().toLowerCase())) {
+                        alert('Name already taken.');
+                        newName = prompt("Rename Tab:", State.activeTab.name);
+                    }
+                    if (newName && newName.trim()) State.renameTab(newName.trim());
+                };
+
+                const formContent = document.createElement('div');
+                formContent.className = 'form-content';
+                const entryForm = document.createElement('form');
+                entryForm.id = 'dataEntryForm';
+                entryForm.className = 'flex flex-col gap-4';
+
+                // EDIT MODE DETECTION
+                const isEditMode = State.selectedRows.size === 1;
+                let editRecordId = null;
+                let editRecordData = null;
+
+                if (isEditMode) {
+                    const idx = Array.from(State.selectedRows)[0];
+                    editRecordData = State.data[idx]; // Note: index matches data because we render in order (unless sorted later)
+                    // Wait, State.selectedRows tracks INDICES. 
+                    // Verify consistency: default renderer loops data by index.
+                    // If filtering/sorting existed, this would break. But currently it's direct mapping.
+                    if (editRecordData) {
+                        editRecordId = editRecordData.id;
+                        entryForm.dataset.mode = 'update';
+                        entryForm.dataset.id = editRecordId;
+
+                        // Visual Indicator
+                        formHeader.querySelector('span').innerText = `Editing Record`;
+                        formHeader.querySelector('span').style.color = 'var(--primary)';
+                    }
+                }
+
+                // Render Fields
+                if (State.schema.length === 0) {
+                    entryForm.innerHTML = `<p style="color:var(--text-muted); text-align:center; margin-top:2rem;">No columns defined. Add one to start.</p>`;
+                } else {
+                    State.schema.forEach((col, index) => {
+                        const fieldWrapper = document.createElement('div');
+                        let attrs = ''; // Default to optional
+                        if (col.options?.required) attrs += ' required'; // Only required if flag is set
+
+                        if (col.options?.maxLength) attrs += ` maxlength="${col.options.maxLength}"`;
+                        if (col.options?.minVal !== undefined && col.options.minVal !== null && !isNaN(col.options.minVal)) attrs += ` min="${col.options.minVal}"`;
+                        if (col.options?.maxVal !== undefined && col.options.maxVal !== null && !isNaN(col.options.maxVal)) attrs += ` max="${col.options.maxVal}"`;
+
+                        if (col.type === 'date') {
+                            if (!col.options?.maxVal) attrs += ` max="9999-12-31"`;
+                        }
+
+                        // PRE-FILL VALUE IF EDITING
+                        let value = '';
+                        if (isEditMode && editRecordData) {
+                            value = editRecordData[col.id] || '';
+                            // HTML attribute needs escaping if not using .value property setter. 
+                            // But cleaner to set .value after create.
+                        }
+
+                        // Drag & Drop Attributes
+                        fieldWrapper.draggable = true;
+                        fieldWrapper.style.cursor = 'move';
+                        fieldWrapper.addEventListener('dragstart', (e) => this.handleDragStart(e, index));
+                        fieldWrapper.addEventListener('dragover', this.handleDragOver);
+                        fieldWrapper.addEventListener('drop', (e) => this.handleDrop(e, index));
+
+                        fieldWrapper.innerHTML = `
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="label">
+                                    ${col.label}
+                                    ${col.options?.required ? '<span style="color:#ef4444; margin-left:0.1rem;">*</span>' : ''}
+                                </label>
+                                <div>
+                                    <button type="button" class="btn-icon edit-col-btn" title="Edit" style="margin-right:0.5rem; font-size:0.9rem;">✏️</button>
+                                    <button type="button" class="btn-icon delete-col-btn" data-id="${col.id}" style="font-size:1.1rem;">&times;</button>
+                                </div>
+                            </div>
+                            <input type="${col.type}" name="${col.id}" class="input" ${attrs} value="${value.replace(/"/g, '&quot;')}">
+                        `;
+
+                        // Add Blur Listener for Formatting & Dirty Check
+                        const input = fieldWrapper.querySelector('input');
+                        input.addEventListener('blur', (e) => this.handleInputBlur(e, col));
+
+                        // DIRTY TRACKING
+                        input.addEventListener('input', (e) => {
+                            const originalVal = isEditMode && editRecordData ? (editRecordData[col.id] || '') : '';
+                            // Simple string comparison (loose)
+                            if (e.target.value != originalVal) {
+                                e.target.classList.add('is-dirty');
+                            } else {
+                                e.target.classList.remove('is-dirty');
+                            }
+                        });
+
+                        // Strict MaxLength
+                        if (col.options?.maxLength) {
+                            input.addEventListener('input', (e) => {
+                                if (e.target.value.length > col.options.maxLength) {
+                                    e.target.value = e.target.value.slice(0, col.options.maxLength);
+                                }
+                            });
+                        }
+
+                        // Handlers
+                        fieldWrapper.querySelector('.edit-col-btn').addEventListener('click', () => this.openColumnModal(col));
+                        fieldWrapper.querySelector('.delete-col-btn').addEventListener('click', (e) => {
+                            if (confirm(`Delete column "${col.label}"?`)) State.deleteColumn(col.id);
+                        });
+                        entryForm.appendChild(fieldWrapper);
+                    });
+
+                    const submitBtn = document.createElement('button');
+                    submitBtn.type = 'submit';
+                    submitBtn.className = isEditMode ? 'btn btn-secondary w-full' : 'btn btn-primary w-full';
+                    submitBtn.style.marginTop = '1rem';
+                    submitBtn.innerText = isEditMode ? 'Update Entry' : 'Add Entry';
+                    // Visual distinction for Update
+                    if (isEditMode) submitBtn.style.border = '1px solid var(--primary)';
+
+                    entryForm.appendChild(submitBtn);
+
+                    if (isEditMode) {
+                        const cancelBtn = document.createElement('button');
+                        cancelBtn.type = 'button';
+                        cancelBtn.className = 'btn btn-ghost w-full';
+                        cancelBtn.style.marginTop = '0.5rem';
+                        cancelBtn.innerText = 'Cancel Edit';
+                        cancelBtn.onclick = () => { State.selectedRows.clear(); Router.render(); };
+                        entryForm.appendChild(cancelBtn);
+                    }
+                }
+
+                // ENTER KEY NAVIGATION
+                entryForm.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        // Get visible inputs only
+                        const inputs = Array.from(entryForm.querySelectorAll('input:not([type="hidden"]):not([disabled])'));
+                        const index = inputs.indexOf(e.target);
+                        // If not the last input, move focus
+                        if (index > -1 && index < inputs.length - 1) {
+                            e.preventDefault();
+                            inputs[index + 1].focus();
+                        }
+                    }
+                });
+
+                entryForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    if (State.schema.length === 0) return;
+
+                    const formData = {};
+                    State.schema.forEach(col => {
+                        let val = e.target[col.id].value;
+                        if (col.type === 'text' && col.options?.autoTrim) {
+                            val = val.trim();
+                        }
+                        formData[col.id] = val;
+                    });
+
+                    try {
+                        if (e.target.dataset.mode === 'update') {
+                            State.updateEntry(parseInt(e.target.dataset.id), formData);
+                            this.showToast('Entry updated successfully');
+                        } else {
+                            State.addEntry(formData);
+                            e.target.reset();
+                            this.showToast('Entry added successfully');
+                        }
+                    } catch (err) {
+                        alert(err.message);
+                    }
+
+                    // POST-SUBMIT FOCUS RESET
+                    // Since render() destroys the form, we must re-query the new one.
+                    setTimeout(() => {
+                        const newForm = document.getElementById('dataEntryForm');
+                        if (newForm) {
+                            const firstInput = newForm.querySelector('input:not([type="hidden"]):not([disabled])');
+                            if (firstInput) firstInput.focus();
+                        }
+                    }, 0);
+                });
+
+                formContent.appendChild(entryForm);
+                leftPanel.appendChild(formHeader);
+                leftPanel.appendChild(formContent);
+
+                // -- RIGHT PANEL: TABLE --
+                const rightPanel = document.createElement('div');
+                rightPanel.className = 'card panel p-4';
+
+                const tableHeader = document.createElement('div');
+                tableHeader.className = 'panel-header';
+                const selectedCount = State.selectedRows.size;
+                tableHeader.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span>Records (${State.data.length})</span>
+                        ${selectedCount > 0 ? `<button id="btnDelSel" class="btn btn-danger" style="font-size:0.8rem; padding:0.2rem 0.5rem;">Delete Selected (${selectedCount})</button>` : ''}
+                    </div>
+                    <div class="flex gap-2 items-center">
+                        <button id="btnClearAll" class="btn btn-danger" style="font-size:0.8rem;">Clear All</button>
+                        
+                        <!-- Export Dropdown -->
+                        <div style="position:relative;">
+                            <button id="btnExportMenu" class="btn btn-secondary" style="font-size:0.8rem;">Export ▼</button>
+                            <div id="exportDropdown" style="display:none; position:absolute; right:0; top:110%; background:var(--bg-card); border:1px solid var(--card-border); border-radius:0.5rem; padding:0.5rem; min-width:120px; z-index:50; box-shadow:0 4px 12px rgba(0,0,0,0.5);">
+                                <button id="btnExpCsv" class="btn btn-secondary w-full" style="font-size:0.8rem; margin-bottom:0.25rem; text-align:left;">CSV</button>
+                                <button id="btnExpJson" class="btn btn-secondary w-full" style="font-size:0.8rem; margin-bottom:0.25rem; text-align:left;">JSON</button>
+                                <!-- Added PDF Option -->
+                                <button id="btnExpPdf" class="btn btn-secondary w-full" style="font-size:0.8rem; text-align:left;">PDF</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Export Dropdown Logic
+                const menuBtn = tableHeader.querySelector('#btnExportMenu');
+                const menu = tableHeader.querySelector('#exportDropdown');
+
+                menuBtn.onclick = (e) => { e.stopPropagation(); menu.style.display = menu.style.display === 'none' ? 'block' : 'none'; };
+                document.onclick = () => { menu.style.display = 'none'; }; // Close on click outside
+                menu.onclick = (e) => e.stopPropagation(); // Prevent closing when clicking inside menu
+
+                tableHeader.querySelector('#btnExpCsv').addEventListener('click', () => { State.exportCSV(); menu.style.display = 'none'; });
+                tableHeader.querySelector('#btnExpJson').addEventListener('click', () => { State.exportJSON(); menu.style.display = 'none'; });
+                // PDF Handler Wiring
+                tableHeader.querySelector('#btnExpPdf').addEventListener('click', () => { State.exportPDF(); menu.style.display = 'none'; });
+
+                tableHeader.querySelector('#btnClearAll').addEventListener('click', () => {
+                    if (confirm("Are you sure you want to delete ALL records? This cannot be undone.")) State.clearAll();
+                });
+                if (selectedCount > 0) {
+                    tableHeader.querySelector('#btnDelSel').addEventListener('click', () => {
+                        if (confirm(`Delete ${selectedCount} selected records?`)) State.deleteSelected();
+                    });
+                }
+
+                const tableContainer = document.createElement('div');
+                tableContainer.className = 'table-container';
+
+                if (State.data.length === 0) {
+                    tableContainer.innerHTML = `<div style="padding:2rem; text-align:center; color:var(--text-muted);">No data entries found.</div>`;
+                } else {
+                    const table = document.createElement('table');
+
+                    // Table Head
+                    const thead = document.createElement('thead');
+                    const headerRow = document.createElement('tr');
+
+                    // Checkbox Col Header
+                    const thCheck = document.createElement('th');
+                    thCheck.style.width = '30px';
+                    thCheck.innerHTML = `<input type="checkbox" ${State.data.length > 0 && State.selectedRows.size === State.data.length ? 'checked' : ''}>`;
+                    thCheck.querySelector('input').addEventListener('click', () => State.toggleSelectAll());
+                    headerRow.appendChild(thCheck);
+
+                    State.schema.forEach((col, index) => {
+                        const th = document.createElement('th');
+                        th.innerText = col.label;
+
+                        // Drag Drop Attributes
+                        th.draggable = true;
+                        th.style.cursor = 'move';
+                        th.addEventListener('dragstart', (e) => this.handleDragStart(e, index));
+                        th.addEventListener('dragover', this.handleDragOver);
+                        th.addEventListener('drop', (e) => this.handleDrop(e, index));
+
+                        headerRow.appendChild(th);
+                    });
+                    // Actions Col
+                    const thAction = document.createElement('th');
+                    thAction.style.width = '50px';
+                    headerRow.appendChild(thAction);
+                    thead.appendChild(headerRow);
+                    table.appendChild(thead);
+
+                    // Table Body
+                    const tbody = document.createElement('tbody');
+                    State.data.forEach((row, rowIndex) => {
+                        const tr = document.createElement('tr');
+                        // EDIT HIGHLIGHT
+                        if (State.selectedRows.has(rowIndex) && State.selectedRows.size === 1) {
+                            tr.classList.add('editing-row');
+                        }
+
+                        // Checkbox Cell
+                        const tdCheck = document.createElement('td');
+                        tdCheck.innerHTML = `<input type="checkbox" ${State.selectedRows.has(rowIndex) ? 'checked' : ''}>`;
+                        tdCheck.querySelector('input').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            State.toggleSelection(rowIndex);
+                        });
+                        tr.appendChild(tdCheck);
+
+                        State.schema.forEach(col => {
+                            const td = document.createElement('td');
+                            const rawVal = row[col.id];
+                            td.innerText = this.formatValue(rawVal, col); // USE FORMATTER
+                            tr.appendChild(td);
+                        });
+
+                        const tdAction = document.createElement('td');
+                        const delBtn = document.createElement('button');
+                        delBtn.innerHTML = '&times;';
+                        delBtn.className = 'btn-icon delete-row-btn';
+                        delBtn.style.padding = '0.2rem';
+                        delBtn.style.fontSize = '1.2rem';
+                        delBtn.onclick = () => { if (confirm('Delete row?')) State.deleteEntry(row.id); };
+                        tdAction.appendChild(delBtn);
+                        tr.appendChild(tdAction);
+
+                        tbody.appendChild(tr);
+                    });
+                    table.appendChild(tbody);
+                    tableContainer.appendChild(table);
+                }
+
+                rightPanel.appendChild(tableHeader);
+                rightPanel.appendChild(tableContainer);
+
+                // Append All
+                main.appendChild(leftPanel);
+                main.appendChild(rightPanel);
+
+                // Append All
+                main.appendChild(leftPanel);
+                main.appendChild(rightPanel);
+
+                container.appendChild(header);
+                container.appendChild(main);
+                this.app.appendChild(container);
+            },
+
+            openAdminSettings() {
+                const modal = document.createElement('div');
+                modal.className = 'modal-overlay';
+
+                const isDefaultAdmin = State.currentUser.adminType === 'default';
+
+                const renderModalContent = () => {
+                    // Filter: Admins see OWN users + Themselves
+                    // Only show users created by CURRENT admin
+                    const myUsers = State.users.filter(u => u.createdBy === State.currentUser.id);
+                    const listTitle = `My Users (${myUsers.length} / 20)`;
+
+                    const userListHtml = myUsers.map(u => `
+                        <div class="flex justify-between items-center p-2" style="background:rgba(255,255,255,0.05); margin-bottom:0.5rem; border-radius:0.25rem;">
+                            <div class="flex flex-col">
+                                <span style="font-weight:600;">${u.id} <small style="color:var(--primary);">${u.role === 'admin' ? '(Admin)' : ''}</small></span>
+                                <span style="font-size:0.75rem; color:var(--text-muted);">Pass: (Hidden)</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="btn-change-pass btn-secondary" style="padding:0.2rem 0.5rem; font-size:0.8rem;" data-id="${u.id}">Change Pass</button>
+                                <button class="btn-del-user btn-danger" style="padding:0.2rem 0.5rem; border:1px solid var(--danger); background:transparent; font-size:0.8rem;" data-id="${u.id}">Delete</button>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    // CONDITIONAL HTML for Identity Section
+                    let identitySection = '';
+                    if (isDefaultAdmin) {
+                        identitySection = `
+                            <div class="mb-6 p-4" style="background:rgba(239, 68, 68, 0.1); border:1px solid var(--danger); border-radius:12px;">
+                                <h4 class="mb-2" style="color:var(--danger); font-weight:700; font-size:1.1rem;">⚠️ Default Admin Mode</h4>
+                                <p style="font-size:0.9rem; color: #fca5a5; margin-bottom:1rem;">
+                                    You are logged in as the factory Default Admin. This account is read-only and used only for initial setup or recovery.
+                                    <br><br>
+                                    <strong>Action Required:</strong> Please create a Custom Admin below for daily operations.
+                                </p>
+                            </div>
+                            
+                            <!-- CREATE CUSTOM ADMIN -->
+                            <div class="mb-6 p-4" style="background:rgba(59, 130, 246, 0.1); border:1px solid var(--primary); border-radius:12px;">
+                                <h4 class="mb-4" style="color:var(--primary); font-weight:700; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:0.5rem; font-size:1.1rem;">Create Custom Admin</h4>
+                                <form id="addCustomAdminForm" style="display:grid; grid-template-columns: 1fr 1fr 140px; gap:1rem; align-items:end;">
+                                    <div>
+                                        <label class="label">New Admin ID</label>
+                                        <input name="uid" class="input" placeholder="e.g. superadmin" required>
+                                    </div>
+                                    <div>
+                                        <label class="label">Password</label>
+                                        <input name="pass" class="input" placeholder="••••••••" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary" style="height:44px;">Create Admin</button>
+                                </form>
+                            </div>
+                        `;
+                    } else {
+                        identitySection = `
+                            <div class="mb-6 p-4" style="background:rgba(59, 130, 246, 0.1); border:1px solid rgba(59, 130, 246, 0.3); border-radius:12px;">
+                                <h4 class="mb-4" style="color:var(--primary); font-weight:700; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:0.5rem; font-size:1.1rem;">My Identity</h4>
+                                
+                                <!-- Rename ID -->
+                                <form id="changeMyIdForm" style="display:grid; grid-template-columns: 1fr 140px; gap:1rem; align-items:end; margin-bottom:1.5rem;">
+                                    <div>
+                                        <label class="label" style="font-size:0.95rem; margin-bottom:0.4rem; display:block; color:var(--text-main);">Admin ID</label>
+                                        <input name="newId" class="input" style="width:100%; height:44px;" placeholder="${State.currentUser.id}" value="${State.currentUser.id}" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-secondary" style="height:44px; width:100%; font-size:0.95rem;">Rename ID</button>
+                                </form>
+
+                                <!-- Change Password -->
+                                <form id="changeMyPassForm" style="display:grid; grid-template-columns: 1fr 140px; gap:1rem; align-items:end;">
+                                    <div>
+                                        <label class="label" style="font-size:0.95rem; margin-bottom:0.4rem; display:block; color:var(--text-main);">New Password</label>
+                                        <input name="newPass" type="password" class="input" style="width:100%; height:44px;" placeholder="••••••••" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-secondary" style="height:44px; width:100%; font-size:0.95rem;">Update Pass</button>
+                                </form>
+                            </div>
+                        `;
+                    }
+
+                    modal.innerHTML = `
+                        <div class="card p-6" style="width: 600px; max-height: 85vh; overflow-y:auto; display:flex; flex-direction:column;">
+                            <div class="flex justify-between items-center mb-6">
+                                <h2 style="font-weight:700; font-size:1.2rem;">Admin Settings</h2>
+                                <button type="button" id="btnCloseSettings" class="btn btn-secondary" style="padding:0.25rem 0.5rem;">Done</button>
+                            </div>
+
+                            ${identitySection}
+
+                            <!-- USER MANAGEMENT SECTION -->
+                            <div class="p-4" style="background:rgba(0,0,0,0.2); border-radius:12px; border:1px solid var(--card-border);">
+                                <h4 class="mb-4" style="color:var(--text); font-weight:700; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:0.5rem; font-size:1.1rem;">User Management</h4>
+                                
+                                <form id="addUserForm" style="display:grid; grid-template-columns: 1fr 1fr 140px; gap:1rem; align-items:end; margin-bottom:1.5rem;">
+                                    <div>
+                                        <label class="label" style="font-size:0.95rem; margin-bottom:0.4rem; display:block; color:var(--text-main);">User ID</label>
+                                        <input name="uid" class="input" style="width:100%; height:44px;" placeholder="e.g. jdoe" required>
+                                    </div>
+                                    <div>
+                                        <label class="label" style="font-size:0.95rem; margin-bottom:0.4rem; display:block; color:var(--text-main);">Password</label>
+                                        <input name="pass" class="input" style="width:100%; height:44px;" placeholder="••••••••" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary" style="height:44px; width:100%; font-size:0.95rem;">Create User</button>
+                                </form>
+
+                                <!-- List -->
+                                <div>
+                                    <h5 class="mb-3" style="font-size:0.9rem; color:var(--text-muted); font-weight:600;">${listTitle}</h5>
+                                    <div id="userListContainer" style="max-height: 300px; overflow-y:auto; border:1px solid var(--card-border); border-radius:0.5rem;">
+                                        ${userListHtml}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    // Bind Events
+                    modal.querySelector('#btnCloseSettings').onclick = () => modal.remove();
+
+                    // 1. ADD CUSTOM ADMIN (Default Admin Only)
+                    const addCustomAdminForm = modal.querySelector('#addCustomAdminForm');
+                    if (addCustomAdminForm) {
+                        addCustomAdminForm.addEventListener('submit', async (e) => {
+                            e.preventDefault();
+                            try {
+                                const uid = e.target.uid.value;
+                                const pass = e.target.pass.value;
+                                if (!uid.trim() || !pass.trim()) throw new Error("Fields cannot be empty");
+
+                                await State.addCustomAdmin(uid, pass);
+                                alert(`Custom Admin "${uid}" created successfully.`);
+                                e.target.reset();
+                                renderModalContent();
+                            } catch (err) { alert(err.message); }
+                        });
+                    }
+
+                    // 2. IDENTITY FORMS (Custom Admin Only)
+                    if (!isDefaultAdmin) {
+                        modal.querySelector('#changeMyIdForm').addEventListener('submit', async (e) => {
+                            e.preventDefault();
+                            const newId = e.target.newId.value;
+                            if (newId.trim() === '' || newId === State.currentUser.id) return;
+                            if (confirm(`Rename Admin ID to "${newId}"? This will migrate all your users.`)) {
+                                try {
+                                    const count = await State.updateAdminId(newId);
+                                    alert(`Admin renamed to ${newId}. ${count} users migrated.`);
+                                    modal.remove();
+                                    State.logout();
+                                    alert("Please log in with your new Admin ID.");
+                                } catch (err) { alert(err.message); }
+                            }
+                        });
+
+                        modal.querySelector('#changeMyPassForm').addEventListener('submit', async (e) => {
+                            e.preventDefault();
+                            const newPass = e.target.newPass.value;
+                            if (newPass.trim() === '') return;
+                            await State.updateUserPassword(State.currentUser.id, newPass);
+                            alert('Password Updated!');
+                            e.target.reset();
+                        });
+                    }
+
+                    // 3. ADD USER
+                    modal.querySelector('#addUserForm').addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        try {
+                            const uid = e.target.uid.value;
+                            const pass = e.target.pass.value;
+                            if (uid.trim() === '' || pass.trim() === '') throw new Error("Fields cannot be empty");
+
+                            await State.addUser(uid, pass);
+                            alert(`User ${uid} created.`);
+                            renderModalContent();
+                        } catch (err) {
+                            alert(err.message);
+                        }
+                    });
+
+                    // 4. CHANGE PASS (List)
+                    modal.querySelectorAll('.btn-change-pass').forEach(btn => {
+                        btn.onclick = async (e) => {
+                            const uid = e.target.getAttribute('data-id');
+                            const newP = prompt(`Enter new password for ${uid}:`);
+                            if (newP && newP.trim() !== '') {
+                                try {
+                                    await State.updateUserPassword(uid, newP);
+                                    alert(`Password for ${uid} updated.`);
+                                } catch (err) { alert(err.message); }
+                            }
+                        };
+                    });
+
+                    // 5. DELETE USER (List)
+                    modal.querySelectorAll('.btn-del-user').forEach(btn => {
+                        btn.onclick = (e) => {
+                            const uid = e.target.getAttribute('data-id');
+                            if (confirm(`Delete User ${uid}?`)) {
+                                try {
+                                    State.deleteUser(uid);
+                                    renderModalContent();
+                                } catch (err) { alert(err.message); }
+                            }
+                        };
+                    });
+                };
+                renderModalContent();
+                document.body.appendChild(modal);
+            },
+
+            openColumnModal(existingCol = null) {
+                const modal = document.createElement('div');
+                modal.className = 'modal-overlay';
+                const isEdit = !!existingCol;
+
+                // Modal HTML with Conditional Fields
+                modal.innerHTML = `
+                    <div class="card p-6" style="width: 400px;">
+                        <h3 class="mb-4">${isEdit ? 'Edit Column' : 'Add Column'}</h3>
+                        <form id="addColForm" class="flex flex-col gap-4">
+                            <div>
+                                <label class="label">Column Name</label>
+                                <input name="label" class="input" placeholder="e.g. Revenue" value="${isEdit ? existingCol.label : ''}" required>
+                                <small id="colNameError" style="color:var(--danger); display:none; margin-top:0.25rem;">Column name already exists.</small>
+                            </div>
+                            <div>
+                                <label class="label">Data Type</label>
+                                <select name="type" id="typeSelect" class="input" style="appearance:none; background-color:rgba(0,0,0,0.4);">
+                                    <option value="text" ${isEdit && existingCol.type === 'text' ? 'selected' : ''} style="background:#1e293b; color:white;">Text</option>
+                                    <option value="number" ${isEdit && existingCol.type === 'number' ? 'selected' : ''} style="background:#1e293b; color:white;">Number</option>
+                                    <option value="date" ${isEdit && existingCol.type === 'date' ? 'selected' : ''} style="background:#1e293b; color:white;">Date</option>
+                                    <option value="email" ${isEdit && existingCol.type === 'email' ? 'selected' : ''} style="background:#1e293b; color:white;">Email</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Common Constraints -->
+                            <div class="flex gap-4">
+                                <div class="flex-1">
+                                    <label class="label">Max Length (Optional)</label>
+                                    <input name="maxLength" type="number" class="input" placeholder="e.g. 10" value="${isEdit && existingCol.options?.maxLength ? existingCol.options.maxLength : ''}">
+                                </div>
+                                <div class="flex items-end mb-2 gap-4">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" name="required" ${isEdit && existingCol.options?.required ? 'checked' : ''} style="width:18px; height:18px; accent-color:var(--primary);">
+                                        <span style="color:var(--text); font-size:0.9rem;">Required</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" name="unique" ${isEdit && existingCol.options?.unique ? 'checked' : ''} style="width:18px; height:18px; accent-color:var(--primary);">
+                                        <span style="color:var(--text); font-size:0.9rem;">Unique Only</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Dynamic Options Container -->
+                            <div id="dynamicOptions"></div>
+
+                            <div class="flex gap-2 justify-between mt-4">
+                                <button type="button" class="btn btn-secondary w-full" id="btnCancel">Cancel</button>
+                                <button type="submit" id="btnSubmitCol" class="btn btn-primary w-full">Add</button>
+                            </div>
+                        </form>
+                    </div>
+                `;
+
+                // Logic to update dynamic fields
+                const typeSelect = modal.querySelector('#typeSelect');
+                const dynamicOptions = modal.querySelector('#dynamicOptions');
+
+                const updateOptions = () => {
+                    const type = typeSelect.value;
+                    let html = '';
+                    const opts = isEdit ? existingCol.options || {} : {};
+
+                    if (type === 'text') {
+                        html = `
+                            <div>
+                                <label class="label">Text Parsing</label>
+                                <select name="casing" class="input" style="appearance:none; background-color:rgba(0,0,0,0.4);">
+                                    <option value="none" ${opts.casing === 'none' ? 'selected' : ''} style="background:#1e293b; color:white;">Check Casing (None)</option>
+                                    <option value="upper" ${opts.casing === 'upper' ? 'selected' : ''} style="background:#1e293b; color:white;">UPPER CASE</option>
+                                    <option value="lower" ${opts.casing === 'lower' ? 'selected' : ''} style="background:#1e293b; color:white;">lower case</option>
+                                    <option value="title" ${opts.casing === 'title' ? 'selected' : ''} style="background:#1e293b; color:white;">Title Case (Proper Name)</option>
+                                </select>
+                            </div>
+                            <div class="mt-4">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" name="autoTrim" ${opts.autoTrim ? 'checked' : ''} style="width:18px; height:18px; accent-color:var(--primary);">
+                                    <span style="color:var(--text); font-size:0.9rem;">Auto Trim Whitespace</span>
+                                </label>
+                            </div>
+                        `;
+                    } else if (type === 'number') {
+                        html = `
+                            <div>
+                                <label class="label">Number Format</label>
+                                <select name="numFormat" id="numFormat" class="input" style="appearance:none; background-color:rgba(0,0,0,0.4);">
+                                    <option value="none" ${opts.numFormat === 'none' ? 'selected' : ''} style="background:#1e293b; color:white;">General (123)</option>
+                                    <option value="currency" ${opts.numFormat === 'currency' ? 'selected' : ''} style="background:#1e293b; color:white;">Currency ($123.00)</option>
+                                    <option value="decimal" ${opts.numFormat === 'decimal' ? 'selected' : ''} style="background:#1e293b; color:white;">Decimal (123.00)</option>
+                                </select>
+                            </div>
+                            <div class="mt-2">
+                                <label class="label">Decimal Places</label>
+                                <input name="decimalPlaces" type="number" min="0" max="10" class="input" placeholder="2" value="${opts.decimalPlaces !== undefined ? opts.decimalPlaces : ''}">
+                            </div>
+                            <div class="flex gap-2 mt-2">
+                                <div class="w-full">
+                                    <label class="label">Min Value</label>
+                                    <input name="minVal" type="number" class="input" placeholder="e.g. 0" value="${opts.minVal !== undefined ? opts.minVal : ''}">
+                                </div>
+                                <div class="w-full">
+                                    <label class="label">Max Value</label>
+                                    <input name="maxVal" type="number" class="input" placeholder="e.g. 100" value="${opts.maxVal !== undefined ? opts.maxVal : ''}">
+                                </div>
+                            </div>
+                            <div id="currencyCodeBox" class="${opts.numFormat === 'currency' ? '' : 'hidden'} mt-2">
+                                <label class="label">Currency Code</label>
+                                <select name="currency" class="input" style="appearance:none; background-color:rgba(0,0,0,0.4);">
+                                    <option value="USD" ${opts.currency === 'USD' ? 'selected' : ''} style="background:#1e293b; color:white;">USD ($)</option>
+                                    <option value="INR" ${opts.currency === 'INR' ? 'selected' : ''} style="background:#1e293b; color:white;">INR (₹)</option>
+                                    <option value="EUR" ${opts.currency === 'EUR' ? 'selected' : ''} style="background:#1e293b; color:white;">EUR (€)</option>
+                                    <option value="GBP" ${opts.currency === 'GBP' ? 'selected' : ''} style="background:#1e293b; color:white;">GBP (£)</option>
+                                </select>
+                            </div>
+                        `;
+                    } else if (type === 'date') {
+                        html = `
+                            <div>
+                                <label class="label">Date Format</label>
+                                <select name="dateFormat" class="input" style="appearance:none; background-color:rgba(0,0,0,0.4);">
+                                    <option value="short" ${opts.dateFormat === 'short' ? 'selected' : ''} style="background:#1e293b; color:white;">Short (1/31/2026)</option>
+                                    <option value="long" ${opts.dateFormat === 'long' ? 'selected' : ''} style="background:#1e293b; color:white;">Long (January 31, 2026)</option>
+                                    <option value="iso" ${opts.dateFormat === 'iso' ? 'selected' : ''} style="background:#1e293b; color:white;">ISO (2026-01-31)</option>
+                                </select>
+                            </div>
+                        `;
+                    }
+                    dynamicOptions.innerHTML = html;
+
+                    // Attach listener for Number Format change
+                    if (type === 'number') {
+                        const numFmt = modal.querySelector('#numFormat');
+                        const currBox = modal.querySelector('#currencyCodeBox');
+                        if (numFmt) {
+                            numFmt.addEventListener('change', () => {
+                                if (numFmt.value === 'currency') currBox.classList.remove('hidden');
+                                else currBox.classList.add('hidden');
+                            });
+                        }
+                    }
+                };
+
+                // Init with default
+                updateOptions();
+                typeSelect.addEventListener('change', updateOptions);
+
+                // --- VALIDATION LOGIC ---
+                const labelInput = modal.querySelector('input[name="label"]');
+                const errorSpan = modal.querySelector('#colNameError');
+                const submitBtn = modal.querySelector('#btnSubmitCol');
+
+                labelInput.addEventListener('input', () => {
+                    const val = labelInput.value.trim().toLowerCase();
+                    const duplicate = State.schema.some(col =>
+                        col.label.trim().toLowerCase() === val &&
+                        (!isEdit || col.id !== existingCol.id) // Ignore self if editing
+                    );
+
+                    if (duplicate) {
+                        errorSpan.style.display = 'block';
+                        submitBtn.disabled = true;
+                        submitBtn.style.opacity = '0.5';
+                    } else {
+                        errorSpan.style.display = 'none';
+                        submitBtn.disabled = false;
+                        submitBtn.style.opacity = '1';
+                    }
+                });
+
+                modal.querySelector('#btnCancel').addEventListener('click', () => modal.remove());
+
+                modal.querySelector('#addColForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+
+                    const label = e.target.label.value;
+                    const type = e.target.type.value;
+                    const maxLength = e.target.maxLength.value ? parseInt(e.target.maxLength.value) : null;
+                    const required = e.target.required.checked; // Capture Required
+                    const unique = e.target.unique.checked; // Capture Unique
+                    const options = { maxLength, required, unique };
+
+                    if (type === 'text') {
+                        options.casing = e.target.casing.value;
+                        options.autoTrim = e.target.autoTrim.checked;
+                    }
+                    else if (type === 'number') {
+                        options.numFormat = e.target.numFormat.value;
+                        options.decimalPlaces = e.target.decimalPlaces.value;
+                        if (options.numFormat === 'currency') options.currency = e.target.currency.value;
+
+                        const min = e.target.minVal.value;
+                        const max = e.target.maxVal.value;
+                        if (min !== '') options.minVal = parseFloat(min);
+                        if (max !== '') options.maxVal = parseFloat(max);
+                    }
+                    else if (type === 'date') {
+                        options.dateFormat = e.target.dateFormat.value;
+                    }
+
+                    try {
+                        if (isEdit) {
+                            State.updateColumn(existingCol.id, label, type, options);
+                        } else {
+                            State.addColumn(label, type, options);
+                        }
+                        modal.remove();
+                    } catch (err) {
+                        alert(err.message); // Fallback for backend check
+                    }
+                });
+
+                document.body.appendChild(modal);
+            },
+
+            showToast(msg) {
+                const t = document.createElement('div');
+                t.className = 'toast';
+                t.innerText = msg;
+                document.body.appendChild(t);
+                setTimeout(() => t.remove(), 2500);
+            }
+        };
+
+        // --- BOOTSTRAP ---
+        document.addEventListener('DOMContentLoaded', () => {
+            Router.init();
+        });
+
+    </script>
+</body>
+
+</html>
