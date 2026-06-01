@@ -1,0 +1,3161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clean Data Entry</title>
+    <style>
+        :root {
+            --bg-color: #212529;
+            /* Dark Mode Default BG Base */
+            --bg-gradient-start: #212529;
+            --bg-gradient-end: #343a40;
+            --card-bg: #343a40;
+            --card-border: #495057;
+            --primary: #f8f9fa;
+            /* High contrast for dark mode */
+            --primary-hover: #e9ecef;
+            --text-main: #f8f9fa;
+            --text-muted: #adb5bd;
+            --danger: #dc3545;
+            /* Standard bootstrap danger */
+            --success: #198754;
+            /* Standard bootstrap success */
+            --font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+
+            /* Palette References for consistency */
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-300: #dee2e6;
+            --gray-400: #ced4da;
+            --gray-500: #adb5bd;
+            --gray-600: #6c757d;
+            --gray-700: #495057;
+            --gray-800: #343a40;
+            --gray-900: #212529;
+        }
+
+        body.light-theme {
+            --bg-color: #f8f9fa;
+            --bg-gradient-start: #f8f9fa;
+            --bg-gradient-end: #dee2e6;
+            --card-bg: #ffffff;
+            --card-border: #dee2e6;
+            --primary: #343a40;
+            /* Dark button for light mode */
+            --primary-hover: #212529;
+            --text-main: #212529;
+            --text-muted: #6c757d;
+            --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            outline: none;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            background-image: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Access Utility */
+        .hidden {
+            display: none !important;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .flex-col {
+            flex-direction: column;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .justify-center {
+            justify-content: center;
+        }
+
+        .gap-2 {
+            gap: 0.5rem;
+        }
+
+        .gap-4 {
+            gap: 1rem;
+        }
+
+        .w-full {
+            width: 100%;
+        }
+
+        .mb-2 {
+            margin-bottom: 0.5rem;
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem;
+        }
+
+        .mb-6 {
+            margin-bottom: 1.5rem;
+        }
+
+        .p-2 {
+            padding: 0.5rem;
+        }
+
+        .p-4 {
+            padding: 1rem;
+        }
+
+        .p-6 {
+            padding: 1.5rem;
+        }
+
+        /* Components */
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--bg-color);
+            /* Contrast Text */
+            border: 1px solid var(--primary);
+        }
+
+        /* Specific override for light mode primary button text if needed, 
+           but relying on vars: Light Mode Primary=DarkGray -> Text=White (set below) */
+        body.light-theme .btn-primary {
+            color: #ffffff;
+        }
+
+        /* Dark Mode Primary is White/LightGray -> Text must be dark */
+        body:not(.light-theme) .btn-primary {
+            color: #212529;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background-color: transparent;
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        .btn-danger:hover {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: var(--gray-100);
+            color: var(--gray-900);
+            border: 1px solid var(--gray-400);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--gray-200);
+        }
+
+        /* Resizing Styles */
+        .resize-handle {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 8px;
+            /* Wider hit area */
+            cursor: col-resize;
+            z-index: 20;
+            transition: background 0.2s;
+        }
+
+        .resize-handle:hover,
+        .resize-handle.active {
+            background: rgba(59, 130, 246, 0.5);
+            /* Visual feedback */
+        }
+
+        .row-resize-handle {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            cursor: row-resize;
+            z-index: 20;
+            background: transparent;
+        }
+
+        .row-resize-handle:hover {
+            background: rgba(59, 130, 246, 0.5);
+        }
+
+        /* Cursor Locks */
+        body.resizing-col {
+            cursor: col-resize !important;
+        }
+
+        body.resizing-row {
+            cursor: row-resize !important;
+        }
+
+        body.resizing-col * {
+            user-select: none !important;
+        }
+
+        /* Prevent text selection */
+        body.resizing-row * {
+            user-select: none !important;
+        }
+
+        /* Tab Navigation Styles */
+        .tab-btn {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.85rem;
+            border-radius: 0.25rem 0.25rem 0 0;
+            /* Tab shape */
+            border: 1px solid transparent;
+            /* default */
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* Active Tab: White BG, Black Text, Bottom Border Dark */
+        .tab-btn.active {
+            background-color: #ffffff;
+            color: #212529;
+            border-bottom: 2px solid #343a40;
+            border-top: 1px solid transparent;
+            /* Clean look */
+        }
+
+        body:not(.light-theme) .tab-btn.active {
+            background-color: var(--primary);
+            color: var(--bg-color);
+            border-bottom: 2px solid var(--primary);
+        }
+
+        /* Inactive Tab: Light Gray BG, Gray Text */
+        .tab-btn.inactive {
+            background-color: var(--gray-200);
+            /* #e9ecef */
+            color: var(--gray-700);
+            /* #495057 */
+        }
+
+        body:not(.light-theme) .tab-btn.inactive {
+            background-color: rgba(255, 255, 255, 0.05);
+            /* Subtle in dark */
+            color: var(--text-muted);
+        }
+
+        .tab-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Neutralize Danger to keep Palette Strict */
+        .btn-danger {
+            background-color: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--gray-600);
+        }
+
+        .btn-danger:hover {
+            background-color: var(--gray-800);
+            color: white;
+            border-color: var(--gray-800);
+        }
+
+        body:not(.light-theme) .btn-danger:hover {
+            background-color: var(--gray-200);
+            color: var(--gray-900);
+        }
+
+        .btn-ghost {
+            background-color: transparent;
+            color: var(--text-muted);
+        }
+
+        .btn-ghost:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+            color: var(--text-main);
+        }
+
+        /* STRICT INPUT RULES: White BG, Black Text ALWAYS */
+        .input {
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--gray-400);
+            /* Medium Light Gray */
+            background: #ffffff !important;
+            color: #212529 !important;
+            width: 100%;
+            transition: border-color 0.2s;
+        }
+
+        /* Dark Mode Border Adjustment */
+        body:not(.light-theme) .input {
+            border-color: var(--gray-500);
+        }
+
+        .input:focus {
+            border-color: var(--gray-700);
+            outline: none;
+            box-shadow: none;
+            /* No glow */
+        }
+
+        ::placeholder {
+            color: var(--gray-500) !important;
+            opacity: 1;
+        }
+
+        .label {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 1rem;
+            box-shadow: var(--glass-shadow);
+        }
+
+        /* Layouts */
+        #login-view {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-box {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        #dashboard-view {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            height: 100vh;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 1rem;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .panel {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .form-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .table-container {
+            flex: 1;
+            overflow: auto;
+            border-radius: 0.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+        }
+
+        table {
+            min-width: 100%;
+            width: max-content;
+            /* Allow growth beyond container */
+            table-layout: fixed;
+            /* Respect column widths */
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 1px solid var(--card-border);
+            color: var(--text-main);
+            white-space: nowrap;
+            /* Prevent wrapping */
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        th {
+            background: var(--gray-200);
+            /* #e9ecef */
+            position: sticky;
+            top: 0;
+            color: var(--gray-800);
+            /* #343a40 */
+            font-weight: 600;
+            z-index: 10;
+        }
+
+        /* Dark Mode Table Header Override */
+        body:not(.light-theme) th {
+            background: var(--gray-800);
+            color: var(--text-main);
+            /* #f8f9fa */
+        }
+
+        tr:hover {
+            background: var(--gray-100);
+            /* #f8f9fa */
+        }
+
+        body:not(.light-theme) tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gray-500);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gray-600);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            animation: slideIn 0.3s ease;
+            z-index: 2000;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Edit Mode Enhancements */
+        .editing-row {
+            background: var(--gray-200) !important;
+            border-left: 3px solid var(--gray-800);
+        }
+
+        body:not(.light-theme) .editing-row {
+            background: rgba(255, 255, 255, 0.1) !important;
+            border-left: 3px solid var(--primary);
+        }
+
+        .input.is-dirty {
+            border-color: var(--gray-600) !important;
+            background: #fff !important;
+            /* Keep white */
+        }
+
+        .input.is-invalid {
+            border-color: var(--danger) !important;
+            background: #fff !important;
+        }
+
+        /* Standardized Icon Styles */
+        .btn-icon,
+        .btn-icon-neutral {
+            filter: grayscale(100%);
+            transition: all 0.2s ease;
+            border: none;
+            background: none;
+            cursor: pointer;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+        }
+
+        .btn-icon:hover,
+        .btn-icon-neutral:hover {
+            filter: none;
+            color: var(--text-main);
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+        }
+
+        /* Filter & Sort UI */
+        .filter-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            margin-left: 0.5rem;
+            cursor: pointer;
+            border-radius: 4px;
+            color: var(--text-muted);
+            transition: all 0.2s;
+            font-size: 0.8rem;
+        }
+
+        .filter-icon:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--text-main);
+        }
+
+        body:not(.light-theme) .filter-icon:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .filter-icon.active {
+            color: var(--text-main);
+            background: var(--gray-300);
+            font-weight: bold;
+        }
+
+        body:not(.light-theme) .filter-icon.active {
+            background: var(--gray-700);
+        }
+
+        .filter-panel {
+            position: fixed;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            width: 280px;
+            max-height: 400px;
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            overflow: hidden;
+        }
+
+        .filter-panel-header {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            background: var(--card-bg);
+        }
+
+        .filter-sort-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            cursor: pointer;
+            border-radius: 4px;
+            color: var(--text-main);
+            background: transparent;
+            border: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .filter-sort-btn:hover {
+            background: var(--gray-200);
+        }
+
+        body:not(.light-theme) .filter-sort-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .filter-search {
+            /* Input style override for filter search specifically if needed to match global input */
+            background: #ffffff !important;
+            border: 1px solid var(--gray-400);
+            padding: 0.4rem;
+            border-radius: 4px;
+            color: #212529 !important;
+            width: 100%;
+        }
+
+        .filter-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+            background: var(--card-bg);
+            /* Match card bg */
+        }
+
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            cursor: pointer;
+        }
+
+        .filter-item:hover {
+            background: var(--gray-200);
+        }
+
+        body:not(.light-theme) .filter-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .filter-actions {
+            padding: 0.75rem;
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            background: var(--card-bg);
+        }
+
+        .resize-handle {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 5px;
+            cursor: col-resize;
+            background: transparent;
+            z-index: 20;
+        }
+
+        .resize-handle:hover,
+        .resize-handle.active {
+            background: var(--primary);
+        }
+
+        .cell-wrap {
+            white-space: normal !important;
+            word-wrap: break-word;
+        }
+
+        .cell-nowrap {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 0;
+            /* Force ellipsis logic */
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- App Container -->
+    <div id="app"></div>
+
+    <script>
+        /**
+         * CLEAN DATA ENTRY FORM - Single File Application
+         * Handles Auth, Dynamic Forms, Data Persistence (localStorage), and Export.
+         */
+
+        // --- CONSTANTS ---
+        const DB_KEYS = {
+            USERS: 'app_v8_users',
+            TABS: 'app_v8_tabs', // New Key for Tabs
+            SESSION: 'app_v8_session',
+            INSTALL_FLAG: 'app_v8_installed' // Flag to detect first run
+        };
+
+        const MAX_USERS = 20;
+
+        // --- SECURITY UTILS ---
+        const Security = {
+            // Basic obfuscation to prevent casual reading of source code strings
+            // Reverses Base64 + Rot13 combo (Not true encryption, but hides from plain sight)
+            deobfuscate(str) {
+                return atob(str).split('').map(c =>
+                    /[a-zA-Z]/.test(c) ? String.fromCharCode(c.charCodeAt(0) + (c.toLowerCase() < 'n' ? 13 : -13)) : c
+                ).join('');
+            },
+
+            async hash(str) {
+                const msgBuffer = new TextEncoder().encode(str);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            }
+        };
+
+        // Secrets (Obfuscated) -> admin / admin@123
+        const SECRETS = {
+            // "admin" -> Rot13 "nqzva" -> B64
+            ADMIN_ID: 'bnF6dmE=',
+            // "admin@123" -> Rot13 "nqzva@123" -> B64
+            ADMIN_PASS: 'bnF6dmFAMTIz',
+            // "Guest" -> Rot13 "Thrfg" -> B64
+            GUEST_ID: 'VGhyZmc=',
+            // "Guest@123" -> Rot13 "Thrfg@123" -> B64
+            GUEST_PASS: 'VGhyZmdAMTIz'
+        };
+
+        // --- STATE MANAGEMENT ---
+        const State = {
+            users: [],
+            tabs: [],
+            activeTabId: null,
+            currentUser: null,
+            theme: localStorage.getItem('app_v8_theme') || 'dark',
+
+            toggleTheme() {
+                this.theme = this.theme === 'dark' ? 'light' : 'dark';
+                localStorage.setItem('app_v8_theme', this.theme);
+                this.applyTheme();
+                Router.render(); // Re-render to update icons
+            },
+
+            applyTheme() {
+                if (this.theme === 'light') document.body.classList.add('light-theme');
+                else document.body.classList.remove('light-theme');
+            },
+
+            // Getters/Setters to Proxy Active Tab
+            get activeTab() { return this.tabs.find(t => t.id === this.activeTabId); },
+            get schema() { return this.activeTab ? this.activeTab.schema : []; },
+            set schema(val) { if (this.activeTab) this.activeTab.schema = val; },
+            get data() { return this.activeTab ? this.activeTab.data : []; },
+            set data(val) { if (this.activeTab) this.activeTab.data = val; },
+
+            // --- FILTER & SORT LOGIC ---
+            get filteredData() {
+                if (!this.activeTab) return [];
+                let d = [...this.activeTab.data];
+
+                // 1. Apply Filters
+                if (this.activeTab.filters) {
+                    Object.entries(this.activeTab.filters).forEach(([colId, allowedValues]) => {
+                        // If null/undefined, it means NO filter active (all allowed)
+                        if (allowedValues && Array.isArray(allowedValues)) {
+                            // Excel Logic: Show rows where value is in the allowed list
+                            // We need to handle type coercion carefully or use formatted values? 
+                            // Standard: Raw values check.
+                            d = d.filter(row => {
+                                const val = row[colId];
+                                // Handle 'Blanks' if we want to get fancy, but simple Includes for now
+                                // If allowedValues includes special token for blank? 
+                                // For now, just direct match.
+                                // If value is undefined in row, treat as empty string or null
+                                const checkVal = (val === undefined || val === null) ? '' : val;
+                                return allowedValues.includes(checkVal);
+                            });
+                        }
+                    });
+                }
+
+                // 2. Apply Sort
+                if (this.activeTab.sort) {
+                    const { colId, direction } = this.activeTab.sort;
+                    const col = this.schema.find(c => c.id === colId);
+                    if (col) {
+                        d.sort((a, b) => {
+                            let valA = a[colId];
+                            let valB = b[colId];
+
+                            // Handle nulls/undefined - usually at bottom? Excel varies.
+                            if (valA === undefined || valA === null) valA = '';
+                            if (valB === undefined || valB === null) valB = '';
+
+                            if (col.type === 'number') {
+                                valA = parseFloat(valA) || 0;
+                                valB = parseFloat(valB) || 0;
+                            } else {
+                                valA = String(valA).toLowerCase();
+                                valB = String(valB).toLowerCase();
+                            }
+
+                            if (valA < valB) return direction === 'asc' ? -1 : 1;
+                            if (valA > valB) return direction === 'asc' ? 1 : -1;
+                            return 0;
+                        });
+                    }
+                }
+
+                return d;
+            },
+
+            setFilter(colId, values) {
+                if (!this.activeTab) return;
+                if (!this.activeTab.filters) this.activeTab.filters = {};
+
+                // If values is null, clear filter
+                if (values === null) {
+                    delete this.activeTab.filters[colId];
+                } else {
+                    this.activeTab.filters[colId] = values;
+                }
+                this.saveTabs();
+                Router.render();
+            },
+
+            clearFilter(colId) {
+                this.setFilter(colId, null);
+            },
+
+            clearAllFilters() {
+                if (!this.activeTab) return;
+                this.activeTab.filters = {};
+                this.saveTabs();
+                Router.render();
+            },
+
+            setSort(colId, direction) {
+                if (!this.activeTab) return;
+                if (!direction) {
+                    this.activeTab.sort = null;
+                } else {
+                    this.activeTab.sort = { colId, direction };
+                }
+                this.saveTabs();
+                Router.render();
+            },
+
+            async init() {
+                // HARD-CODED PRESETS
+                this.adminIdRaw = Security.deobfuscate(SECRETS.ADMIN_ID);
+                this.guestIdRaw = Security.deobfuscate(SECRETS.GUEST_ID);
+
+                // --- FIRST-RUN RESET ---
+                const isInstalled = localStorage.getItem(DB_KEYS.INSTALL_FLAG);
+                if (!isInstalled) {
+                    console.log("First Run: Cleaning...");
+                    localStorage.clear();
+
+                    // Create Guest User ONLY
+                    const guestPass = Security.deobfuscate(SECRETS.GUEST_PASS);
+                    const guestHash = await Security.hash(guestPass);
+
+                    // Note: Default Admin is NOT added to this.users (Persistence Rule)
+                    this.users = [
+                        { id: this.guestIdRaw, password: guestHash, role: 'user', createdBy: 'system' }
+                    ];
+                    this.saveUsers();
+                    localStorage.setItem(DB_KEYS.INSTALL_FLAG, 'true');
+
+                    // Default Tab (Removed - will be created per user on first login)
+                    // this.tabs = [{ id: 'tab_default', name: 'Sheet 1', schema: [{ id: 'name', label: 'Name', type: 'text' }], data: [] }];
+                    // this.activeTabId = 'tab_default';
+                    // this.saveTabs();
+
+                } else {
+                    // Normal Load
+                    const storedUsers = localStorage.getItem(DB_KEYS.USERS);
+                    this.users = storedUsers ? JSON.parse(storedUsers) : [];
+
+                }
+
+                // Check Session
+                const session = sessionStorage.getItem(DB_KEYS.SESSION);
+                if (session) {
+                    this.currentUser = JSON.parse(session);
+                    this.loadUserData();
+                }
+            },
+
+            saveUsers() { localStorage.setItem(DB_KEYS.USERS, JSON.stringify(this.users)); },
+
+            loadUserData() {
+                if (!this.currentUser) return;
+
+                const userKey = `app_v8_data_${this.currentUser.id}`;
+                const storedData = localStorage.getItem(userKey);
+
+                if (storedData) {
+                    this.tabs = JSON.parse(storedData);
+                    this.activeTabId = this.tabs.length > 0 ? this.tabs[0].id : null;
+                } else {
+                    // MIGRATION / INITIALIZATION
+                    // If Default Admin, try to migrate legacy global data
+                    if (this.currentUser.adminType === 'default') {
+                        const legacyData = localStorage.getItem(DB_KEYS.TABS);
+                        if (legacyData) {
+                            console.log("Migrating legacy data to Default Admin...");
+                            this.tabs = JSON.parse(legacyData);
+                            this.activeTabId = this.tabs.length > 0 ? this.tabs[0].id : null;
+                            this.saveTabs(); // Save to new key
+                            return;
+                        }
+                    }
+
+                    // Default Empty Workspace for everyone else (or if no legacy data)
+                    this.tabs = [{ id: 'tab_default', name: 'Sheet 1', schema: [{ id: 'name', label: 'Name', type: 'text' }], data: [] }];
+                    this.activeTabId = 'tab_default';
+                    this.saveTabs();
+                }
+            },
+
+            saveTabs() {
+                if (this.currentUser) {
+                    const userKey = `app_v8_data_${this.currentUser.id}`;
+                    localStorage.setItem(userKey, JSON.stringify(this.tabs));
+                }
+            },
+            saveSchema() { this.saveTabs(); },
+            saveData() { this.saveTabs(); },
+
+            normalizeUserId(userId) {
+                return String(userId || '').trim();
+            },
+
+            findUserById(userId) {
+                const targetId = this.normalizeUserId(userId).toLowerCase();
+                return this.users.find(u => this.normalizeUserId(u.id).toLowerCase() === targetId);
+            },
+
+            // --- CORE DATA INTEGRITY ---
+            cleanValue(value, col) {
+                if (value === null || value === undefined) return '';
+                let cleaned = String(value);
+                const opts = col.options || {};
+
+                // Auto Trim
+                if (col.type === 'text' && opts.autoTrim) {
+                    cleaned = cleaned.trim();
+                }
+
+                // Casing Rules
+                if (col.type === 'text' && opts.casing) {
+                    if (opts.casing === 'upper') cleaned = cleaned.toUpperCase();
+                    if (opts.casing === 'lower') cleaned = cleaned.toLowerCase();
+                    if (opts.casing === 'title') {
+                        cleaned = cleaned.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+                    }
+                }
+
+                return cleaned;
+            },
+
+            // --- TAB MANAGEMENT ---
+            addTab(name) {
+                if (this.tabs.length >= 10) {
+                    alert('Maximum of 10 sheets allowed.');
+                    return;
+                }
+                if (this.tabs.some(t => t.name.toLowerCase() === name.toLowerCase())) {
+                    alert('A tab with this name already exists. Please choose a unique name.');
+                    return;
+                }
+                const newTab = { id: 'tab_' + Date.now(), name: name, schema: [], data: [] };
+                this.tabs.push(newTab);
+                this.switchTab(newTab.id);
+            },
+
+            deleteTab(id) {
+                if (this.tabs.length <= 1) {
+                    alert('Cannot delete the last existing sheet.');
+                    return;
+                }
+                if (!confirm(`Are you sure you want to delete "${this.activeTab.name}"? This cannot be undone.`)) return;
+
+                const idx = this.tabs.findIndex(t => t.id === id);
+                if (idx !== -1) {
+                    this.tabs.splice(idx, 1);
+                    const nextTab = this.tabs[idx - 1] || this.tabs[0];
+                    this.switchTab(nextTab.id);
+                }
+            },
+
+            switchTab(id) {
+                this.activeTabId = id;
+                this.selectedRows.clear();
+                this.saveTabs();
+                Router.render();
+            },
+
+            renameTab(name) {
+                if (this.activeTab) {
+                    if (this.tabs.some(t => t.id !== this.activeTabId && t.name.toLowerCase() === name.toLowerCase())) {
+                        alert('A tab with this name already exists.');
+                        return;
+                    }
+                    this.activeTab.name = name;
+                    this.saveTabs();
+                    Router.render();
+                }
+            },
+
+            async login(userId, password, selectedRole) {
+                const normalizedUserId = this.normalizeUserId(userId);
+                const hash = await Security.hash(password);
+
+                // 1. CUSTOM ADMIN / USER CHECK (LocalStorage)
+                // Case-insensitive ID check
+                const userMatch = this.findUserById(normalizedUserId);
+
+                if (userMatch) {
+                    if (userMatch.password === hash) {
+                        if (userMatch.role !== selectedRole) {
+                            return { success: false, error: `Account exists but is not an ${selectedRole}` };
+                        }
+                        this.currentUser = { ...userMatch, adminType: 'custom' }; // Mark as Custom
+                        sessionStorage.setItem(DB_KEYS.SESSION, JSON.stringify(this.currentUser));
+                        this.loadUserData();
+                        return { success: true };
+                    } else {
+                        return { success: false, error: 'Incorrect Password.' };
+                    }
+                }
+
+                // 2. DEFAULT ADMIN FALLBACK (Secrets)
+                // Only if looking for Admin and not found in custom users
+                if (selectedRole === 'admin') {
+                    // Check Hardcoded Default Admin
+                    const defaultAdminId = Security.deobfuscate(SECRETS.ADMIN_ID);
+                    if (normalizedUserId.toLowerCase() === defaultAdminId.toLowerCase()) {
+                        const defaultAdminPass = Security.deobfuscate(SECRETS.ADMIN_PASS);
+                        const defaultHash = await Security.hash(defaultAdminPass);
+
+                        if (hash === defaultHash) {
+                            this.currentUser = {
+                                id: defaultAdminId,
+                                role: 'admin',
+                                adminType: 'default', // Mark as Default
+                                createdBy: 'system'
+                            };
+                            sessionStorage.setItem(DB_KEYS.SESSION, JSON.stringify(this.currentUser));
+                            this.loadUserData();
+                            return { success: true };
+                        } else {
+                            return { success: false, error: 'Incorrect Password.' };
+                        }
+                    }
+                }
+
+                return { success: false, error: 'User ID Not Found.' };
+            },
+
+            logout() {
+                this.currentUser = null;
+                this.tabs = [];
+                this.activeTabId = null;
+                sessionStorage.removeItem(DB_KEYS.SESSION);
+                Router.render();
+            },
+
+            async addUser(newId, newPassword) {
+                if (this.currentUser.role !== 'admin') throw new Error("Unauthorized");
+                const normalizedId = this.normalizeUserId(newId);
+                if (!normalizedId) throw new Error("User ID cannot be empty.");
+
+                // Partitioning Logic: Count users created by THIS admin
+                const myUsers = this.users.filter(u => u.createdBy === this.currentUser.id && u.role === 'user');
+                if (myUsers.length >= 20) throw new Error("Your max user limit (20) reached.");
+
+                if (this.findUserById(normalizedId)) throw new Error("User ID already exists.");
+
+                const hash = await Security.hash(newPassword);
+                // Tag user with creating admin ID
+                this.users.push({ id: normalizedId, password: hash, role: 'user', createdBy: this.currentUser.id });
+                this.saveUsers();
+            },
+
+            async addCustomAdmin(newId, newPassword) {
+                if (this.currentUser.role !== 'admin') throw new Error("Unauthorized");
+                const normalizedId = this.normalizeUserId(newId);
+                if (!normalizedId) throw new Error("Admin ID cannot be empty.");
+
+                // Prevent creating an admin with the same ID as the hardcoded default (confusion avoidance)
+                const defaultAdminId = Security.deobfuscate(SECRETS.ADMIN_ID);
+                if (normalizedId.toLowerCase() === defaultAdminId.toLowerCase()) {
+                    throw new Error("Cannot create a Custom Admin with the Default Admin ID.");
+                }
+
+                if (this.findUserById(normalizedId)) throw new Error("User ID already exists.");
+
+                const hash = await Security.hash(newPassword);
+                // Custom Admin is stored in localStorage
+                this.users.push({
+                    id: normalizedId,
+                    password: hash,
+                    role: 'admin',
+                    adminType: 'custom',
+                    createdBy: this.currentUser.id
+                });
+                this.saveUsers();
+            },
+
+            deleteUser(userId) {
+                if (this.currentUser.role !== 'admin') throw new Error("Unauthorized");
+
+                // 1. HARD-CODED PRIMARY ADMIN - NOT DELETABLE
+                const defaultAdminId = Security.deobfuscate(SECRETS.ADMIN_ID);
+                if (this.normalizeUserId(userId).toLowerCase() === defaultAdminId.toLowerCase()) throw new Error("Default Admin cannot be deleted.");
+
+                const user = this.findUserById(userId);
+
+                // Allow deleting Custom Admins if created by self (or if we are super admin? 
+                // Requirement says "Never reset custom admin data", implies care.
+                // But generally an Admin should be able to clean up if they created it?
+                // For now, allow deleting if it's in the list and check ownership/role.
+                if (!user) throw new Error("User not found.");
+
+                // Self-deletion check
+                if (this.normalizeUserId(user.id).toLowerCase() === this.normalizeUserId(this.currentUser.id).toLowerCase()) throw new Error("Cannot delete yourself.");
+
+                // Only allow deleting OWN users/admins
+                // If I am Default Admin, I likely 'created' everyone or at least can manage everyone?
+                // The prompt says "Authenticate custom admins first...". 
+                // Let's assume strict ownership for safety.
+                if (user.createdBy && user.createdBy !== this.currentUser.id && this.currentUser.adminType !== 'default') {
+                    throw new Error("Cannot delete users created by another Admin.");
+                }
+
+                this.users = this.users.filter(u => this.normalizeUserId(u.id).toLowerCase() !== this.normalizeUserId(user.id).toLowerCase());
+                this.saveUsers();
+            },
+
+            async updateUserPassword(userId, newPassword) {
+                // 1. DEFAULT ADMIN - IMMUTABLE
+                // If 'adminType' is explicitly default, block.
+                const isSelf = this.normalizeUserId(userId).toLowerCase() === this.normalizeUserId(this.currentUser.id).toLowerCase();
+                if (this.currentUser.adminType === 'default' && isSelf) {
+                    throw new Error("Default Admin password cannot be changed.");
+                }
+
+                // Double check target ID against Hardcoded Default
+                const defaultAdminId = Security.deobfuscate(SECRETS.ADMIN_ID);
+                if (this.normalizeUserId(userId).toLowerCase() === defaultAdminId.toLowerCase()) {
+                    throw new Error("Default Admin password is immutable.");
+                }
+
+                // Allow Admin to change own password OR their own users' passwords
+                if (!isSelf) {
+                    const user = this.findUserById(userId);
+                    if (!user || (user.createdBy !== this.currentUser.id && this.currentUser.adminType !== 'default')) throw new Error("Unauthorized: Can only change own or own user passwords.");
+                }
+
+                const hash = await Security.hash(newPassword);
+                const idx = this.users.findIndex(u => this.normalizeUserId(u.id).toLowerCase() === this.normalizeUserId(userId).toLowerCase());
+                if (idx !== -1) {
+                    this.users[idx].password = hash;
+                    // If updating self, update current session too
+                    if (userId === this.currentUser.id) {
+                        this.currentUser.password = hash;
+                        sessionStorage.setItem(DB_KEYS.SESSION, JSON.stringify(this.currentUser));
+                    }
+                    this.saveUsers();
+                    return true;
+                }
+                return false;
+            },
+
+            async updateAdminId(newId) {
+                if (this.currentUser.role !== 'admin') throw new Error("Unauthorized");
+                const normalizedId = this.normalizeUserId(newId);
+                if (!normalizedId) throw new Error("Admin ID cannot be empty.");
+
+                // 1. DEFAULT ADMIN - IMMUTABLE
+                if (this.currentUser.adminType === 'default') {
+                    throw new Error("Default Admin ID cannot be changed.");
+                }
+
+                if (this.findUserById(normalizedId)) throw new Error("ID already taken.");
+
+                const oldId = this.currentUser.id;
+
+                // 1. Update Admin Record
+                const adminIdx = this.users.findIndex(u => u.id === oldId);
+                if (adminIdx === -1) throw new Error("Admin record not found.");
+
+                this.users[adminIdx].id = normalizedId;
+
+                // 2. Migrate Child Users
+                let migratedCount = 0;
+                this.users.forEach(u => {
+                    if (u.createdBy === oldId) {
+                        u.createdBy = normalizedId;
+                        migratedCount++;
+                    }
+                });
+
+                // 3. Update Session
+                this.currentUser.id = normalizedId;
+                sessionStorage.setItem(DB_KEYS.SESSION, JSON.stringify(this.currentUser));
+
+                this.saveUsers();
+                return migratedCount;
+            },
+
+            // -- SELECTION METHODS --
+            selectedRows: new Set(),
+
+            toggleSelection(index) {
+                if (this.selectedRows.has(index)) this.selectedRows.delete(index);
+                else this.selectedRows.add(index);
+                Router.render();
+            },
+
+            deleteSelected() {
+                // Indices sort desc to avoid shifting issues
+                const indices = Array.from(this.selectedRows).sort((a, b) => b - a);
+                indices.forEach(idx => this.data.splice(idx, 1));
+                this.selectedRows.clear();
+                this.saveData();
+                Router.render();
+            },
+
+            clearAll() {
+                this.data = [];
+                this.selectedRows.clear();
+                this.saveData();
+                Router.render();
+            },
+
+            addColumn(label, type, options = {}) {
+                if (this.schema.some(c => c.label.trim().toLowerCase() === label.trim().toLowerCase())) {
+                    throw new Error(`Column "${label}" already exists. Please use a different name.`);
+                }
+                const id = label.toLowerCase().replace(/[^a-z0-9]/g, '_') + '_' + Date.now().toString().slice(-4);
+                this.schema.push({ id, label, type, options });
+                this.saveSchema();
+                Router.render();
+            },
+
+            updateColumn(colId, newLabel, newType, newOptions) {
+                const idx = this.schema.findIndex(c => c.id === colId);
+                if (idx !== -1) {
+                    if (this.schema.some((c, i) => i !== idx && c.label.trim().toLowerCase() === newLabel.trim().toLowerCase())) {
+                        throw new Error(`Column "${newLabel}" already exists.`);
+                    }
+
+                    const updatedCol = { id: colId, label: newLabel, type: newType, options: newOptions };
+                    this.schema[idx] = updatedCol;
+
+                    // Retroactive Enforcement: Apply new rules to existing data
+                    this.data.forEach(row => {
+                        const val = row[colId];
+                        if (val !== undefined && val !== null) {
+                            row[colId] = this.cleanValue(val, updatedCol);
+                        }
+                    });
+
+                    this.saveSchema();
+                    this.saveData();
+                    Router.render();
+                }
+            },
+
+            reorderColumns(fromIndex, toIndex) {
+                const item = this.schema.splice(fromIndex, 1)[0];
+                this.schema.splice(toIndex, 0, item);
+                this.saveSchema();
+                Router.render();
+            },
+
+            deleteColumn(colId) {
+                this.schema = this.schema.filter(c => c.id !== colId);
+                this.saveSchema();
+                Router.render();
+            },
+
+            addEntry(entryData) {
+                // Central Data Cleaning
+                const cleanedData = {};
+                this.schema.forEach(col => {
+                    cleanedData[col.id] = this.cleanValue(entryData[col.id], col);
+                });
+
+                // Validation: Unique Constraints
+                this.schema.forEach(col => {
+                    if (col.options?.unique) {
+                        const val = cleanedData[col.id];
+                        if ((val || val === 0) && this.data.some(d => d[col.id] === val)) {
+                            throw new Error(`Duplicate value found for "${col.label}"`);
+                        }
+                    }
+                });
+
+                const newRecord = { id: Date.now(), ...cleanedData };
+                this.data.push(newRecord);
+                this.saveData();
+                Router.render();
+            },
+
+            deleteEntry(recordId) {
+                this.data = this.data.filter(d => d.id !== recordId);
+                this.saveData();
+                Router.render();
+            },
+
+            // --- UPDATE ENTRY (Reuse Validation) ---
+            // --- UPDATE ENTRY (Reuse Validation) ---
+            updateEntry(id, entryData) {
+                // Central Cleaning (Partial Updates Support)
+                const cleanedUpdates = {};
+                Object.keys(entryData).forEach(key => {
+                    const col = this.schema.find(c => c.id === key);
+                    if (col) {
+                        cleanedUpdates[key] = this.cleanValue(entryData[key], col);
+                    } else {
+                        cleanedUpdates[key] = entryData[key];
+                    }
+                });
+
+                // Validation: Unique Constraints (Exclude Self)
+                this.schema.forEach(col => {
+                    if (col.options?.unique && cleanedUpdates.hasOwnProperty(col.id)) {
+                        const val = cleanedUpdates[col.id];
+                        // Check if ANYOTHER record has this value
+                        if ((val || val === 0) && this.data.some(d => d.id !== id && d[col.id] === val)) {
+                            throw new Error(`Duplicate value found for "${col.label}"`);
+                        }
+                    }
+                });
+
+                const idx = this.data.findIndex(d => d.id === id);
+                if (idx === -1) throw new Error("Record not found.");
+
+                // Update (Preserve ID and Metadata)
+                this.data[idx] = { ...this.data[idx], ...cleanedUpdates };
+                this.selectedRows.clear(); // Reset Selection
+                this.saveData();
+                Router.render();
+            },
+
+            getExportFileName(extension, isFilteredExport = false) {
+                const rawName = (this.activeTab?.name || 'data').trim() || 'data';
+                const safeName = rawName
+                    .replace(/[<>:"/\\|?*\x00-\x1F]/g, '_')
+                    .replace(/\s+/g, ' ')
+                    .slice(0, 80)
+                    .trim() || 'data';
+                return `${safeName}${isFilteredExport ? '_filtered' : ''}.${extension}`;
+            },
+
+            downloadFile(content, fileName, mimeType) {
+                const blob = new Blob([content], { type: `${mimeType};charset=utf-8` });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = fileName;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+            },
+
+            escapeCSVValue(value) {
+                if (value === null || value === undefined) return '""';
+                const text = String(value).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+                return `"${text.replace(/"/g, '""')}"`;
+            },
+
+            escapeHTML(value) {
+                return String(value ?? '').replace(/[&<>"']/g, char => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                }[char]));
+            },
+
+            exportCSV(dataToExport = null) {
+                if (this.schema.length === 0) return;
+                const isFilteredExport = Array.isArray(dataToExport);
+                const sourceData = isFilteredExport ? dataToExport : this.data;
+                const headers = this.schema.map(col => this.escapeCSVValue(col.label)).join(',');
+                const rows = sourceData.map(row =>
+                    this.schema.map(col => this.escapeCSVValue(row[col.id])).join(',')
+                );
+                this.downloadFile(
+                    `\uFEFF${[headers, ...rows].join('\r\n')}`,
+                    this.getExportFileName('csv', isFilteredExport),
+                    'text/csv'
+                );
+            },
+
+            exportJSON(dataToExport = null) {
+                const isFilteredExport = Array.isArray(dataToExport);
+                const sourceData = isFilteredExport ? dataToExport : this.data;
+                this.downloadFile(
+                    JSON.stringify(sourceData, null, 2),
+                    this.getExportFileName('json', isFilteredExport),
+                    'application/json'
+                );
+            },
+
+            // --- PDF EXPORT HANDLER (Modular Structure) ---
+            exportPDF(dataToExport = null) {
+                const isFilteredExport = Array.isArray(dataToExport);
+                const sourceData = isFilteredExport ? dataToExport : this.data;
+                if (sourceData.length === 0) {
+                    alert('No records to export.');
+                    return;
+                }
+
+                // Minimal Print-to-PDF Implementation
+                const printWindow = window.open('', '_blank', 'height=600,width=800');
+                if (!printWindow) {
+                    alert('Unable to open the print window. Please allow pop-ups and try again.');
+                    return;
+                }
+
+                const title = `${this.activeTab?.name || 'data'} ${isFilteredExport ? '(Filtered)' : ''}`.trim();
+                const safeTitle = this.escapeHTML(title);
+                const headers = this.schema.map(c => `<th>${this.escapeHTML(c.label)}</th>`).join('');
+                const rows = sourceData.map(r =>
+                    `<tr>${this.schema.map(c => `<td>${this.escapeHTML(Router.formatValue(r[c.id], c))}</td>`).join('')}</tr>`
+                ).join('');
+
+                printWindow.document.write(`
+                    <html>
+                    <head>
+                    <title>${safeTitle} - Export</title>
+                        <style>
+                            body { font-family: sans-serif; padding: 20px; }
+                            table { width: 100%; border-collapse: collapse; }
+                            th, td { border: 1px solid #ccc; padding: 8px; text-align: left; white-space: pre-wrap; word-break: break-word; }
+                            th { background: #f0f0f0; }
+                            h1 { font-size: 1.5rem; margin-bottom: 1rem; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>${safeTitle}</h1>
+                        <table>
+                            <thead><tr>${headers}</tr></thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+                    </body>
+                    </html>
+                `);
+
+                printWindow.document.close();
+                printWindow.focus();
+
+                // Delay print slightly to ensure render
+                setTimeout(() => {
+                    printWindow.onafterprint = () => printWindow.close();
+                    printWindow.print();
+                }, 500);
+            }
+        };
+
+        // --- UI RENDERER ---
+        const Router = {
+            app: document.getElementById('app'),
+
+            async init() {
+                await State.init();
+
+                // Security: Disable Context Menu
+                document.addEventListener('contextmenu', event => event.preventDefault());
+
+                this.render();
+            },
+
+            render() {
+                this.app.innerHTML = '';
+                if (!State.currentUser) {
+                    this.renderLogin();
+                } else {
+                    this.renderDashboard();
+                }
+            },
+
+            // Helper for Formatting
+            formatValue(val, col) {
+                if (!val && val !== 0) return '-';
+                const opts = col.options || {};
+
+                if (col.type === 'number') {
+                    if (opts.numFormat === 'currency') {
+                        const decimals = opts.decimalPlaces !== undefined && opts.decimalPlaces !== '' ? parseInt(opts.decimalPlaces) : 2;
+                        return new Intl.NumberFormat('en-US', {
+                            style: 'currency',
+                            currency: opts.currency || 'USD',
+                            minimumFractionDigits: decimals,
+                            maximumFractionDigits: decimals
+                        }).format(val);
+                    } else if (opts.numFormat === 'decimal') {
+                        const decimals = opts.decimalPlaces !== undefined && opts.decimalPlaces !== '' ? parseInt(opts.decimalPlaces) : 2;
+                        return new Intl.NumberFormat('en-US', {
+                            minimumFractionDigits: decimals,
+                            maximumFractionDigits: decimals
+                        }).format(val);
+                    }
+                } else if (col.type === 'date') {
+                    const d = new Date(val);
+                    if (isNaN(d.getTime())) return val;
+
+                    if (opts.dateFormat === 'short') return d.toLocaleDateString(); // 1/31/2026
+                    if (opts.dateFormat === 'long') return d.toLocaleDateString(undefined, { dateStyle: 'long' }); // January 31, 2026
+                }
+                return val;
+            },
+
+            // Helper for Input Parsing
+            handleInputBlur(e, col) {
+                const opts = col.options || {};
+
+                // Auto Trim
+                if (col.type === 'text' && opts.autoTrim) {
+                    e.target.value = e.target.value.trim();
+                }
+
+                if (col.type === 'text' && opts.casing) {
+                    if (opts.casing === 'upper') e.target.value = e.target.value.toUpperCase();
+                    if (opts.casing === 'lower') e.target.value = e.target.value.toLowerCase();
+                    if (opts.casing === 'title') {
+                        e.target.value = e.target.value.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+                    }
+                }
+            },
+
+            // Table DnD Handlers
+            handleDragStart(e, index) {
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', index);
+                e.target.style.opacity = '0.5';
+            },
+
+            handleDragOver(e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                return false;
+            },
+
+            handleDrop(e, toIndex) {
+                e.stopPropagation();
+                const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                if (fromIndex !== toIndex) {
+                    State.reorderColumns(fromIndex, toIndex);
+                }
+                return false;
+            },
+
+            // Col Resize (Excel Style)
+            isResizing: false,
+            initColResize(e, col) {
+                e.stopPropagation();
+                // If double click, it's auto-fit. But standard click is drag.
+                // We handle Auto-Fit separately via dblclick event.
+
+                this.isResizing = true;
+                const startX = e.clientX;
+                const th = e.target.parentElement;
+                const startWidth = th.getBoundingClientRect().width;
+
+                document.body.classList.add('resizing-col'); // Cursor lock
+                e.target.classList.add('active'); // Visual feedback
+
+                const onMove = (moveEvent) => {
+                    // Direct Update (No RAF) for 1:1 feel
+                    const width = startWidth + (moveEvent.clientX - startX);
+                    if (width > 30) {
+                        th.style.width = width + 'px';
+                    }
+                };
+
+                const onUp = (upEvent) => {
+                    document.removeEventListener('mousemove', onMove);
+                    document.removeEventListener('mouseup', onUp);
+                    document.body.classList.remove('resizing-col');
+                    e.target.classList.remove('active');
+
+                    setTimeout(() => this.isResizing = false, 100);
+
+                    const finalWidth = startWidth + (upEvent.clientX - startX);
+                    if (finalWidth > 30) {
+                        if (!col.options) col.options = {};
+                        col.options.width = finalWidth;
+                        State.saveSchema();
+                        // We don't need full re-render, but to be safe and update all cells in column:
+                        Router.render();
+                    }
+                };
+
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('mouseup', onUp);
+            },
+
+            // Auto-Fit Column
+            autoFitColumn(col) {
+                // measure logic
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                ctx.font = "14px Inter, sans-serif"; // Match CSS roughly
+
+                let maxWidth = ctx.measureText(col.label).width + 40; // Header + padding + sort icon space
+
+                // Check visible data
+                // We use State.filteredData to only fit to what's seen (like Excel) or State.data? 
+                // Excel fits to visible.
+                const dataToCheck = State.activeTab.filters ? State.filteredData : State.data;
+
+                // Limit check to first 1000 rows for performance if huge
+                const limit = Math.min(dataToCheck.length, 1000);
+
+                for (let i = 0; i < limit; i++) {
+                    const row = dataToCheck[i];
+                    const val = this.formatValue(row[col.id], col);
+                    const w = ctx.measureText(val).width + 20; // Cell padding
+                    if (w > maxWidth) maxWidth = w;
+                }
+
+                if (!col.options) col.options = {};
+                col.options.width = Math.ceil(maxWidth);
+                State.saveSchema();
+                Router.render();
+            },
+
+            // Row Resize
+            initRowResize(e) {
+                e.stopPropagation();
+                this.isResizing = true;
+
+                const startY = e.clientY;
+                const currentHeight = State.activeTab.rowHeight || 50; // Default
+
+                document.body.classList.add('resizing-row');
+
+                const onMove = (moveEvent) => {
+                    requestAnimationFrame(() => {
+                        const newHeight = currentHeight + (moveEvent.clientY - startY);
+                        if (newHeight >= 20) {
+                            // Update dynamic CSS var or styles? 
+                            // For immediate feedback, we can set style on all TRs? Expensive.
+                            // Or just one variable?
+                            // Since we don't have a CSS var for row height, let's just wait for render?
+                            // No, drag needs feedback. 
+                            // Let's use a temporary CSS variable on the table or just update the current TR?
+                            // Actually, updating ALL rows during drag might be heavy.
+                            // Excel shows a "ghost" line or updates instantly. 
+                            // Let's try updating a CSS variable: --row-height
+                            document.documentElement.style.setProperty('--dynamic-row-height', newHeight + 'px');
+                        }
+                    });
+                };
+
+                const onUp = (upEvent) => {
+                    document.removeEventListener('mousemove', onMove);
+                    document.removeEventListener('mouseup', onUp);
+                    document.body.classList.remove('resizing-row');
+                    setTimeout(() => this.isResizing = false, 100);
+
+                    const finalHeight = currentHeight + (upEvent.clientY - startY);
+                    if (finalHeight >= 20) {
+                        State.activeTab.rowHeight = finalHeight;
+                        State.saveTabs();
+                        Router.render();
+                    }
+                    document.documentElement.style.removeProperty('--dynamic-row-height');
+                };
+
+                // Set initial var for smooth transition if we use it
+                document.documentElement.style.setProperty('--dynamic-row-height', currentHeight + 'px');
+
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('mouseup', onUp);
+            },
+
+            renderLogin() {
+                const container = document.createElement('div');
+                container.id = 'login-view';
+
+                // Toggle State
+                let activeRole = 'user'; // default
+
+                const updateForm = () => {
+                    const box = container.querySelector('.login-box');
+                    box.innerHTML = `
+                        <div class="mb-4 text-center">
+                            <h2 style="font-weight:700; font-size: 1.5rem; margin-bottom: 0.5rem;">Welcome Back</h2>
+                            <p style="color:var(--text-muted)">Clean Data Entry Portal</p>
+                        </div>
+
+                        <!-- Role Toggles -->
+                        <div class="flex gap-2 mb-6 p-1" style="background:rgba(0,0,0,0.3); border-radius:0.5rem;">
+                            <button id="tabUser" type="button" class="btn w-full ${activeRole === 'user' ? 'btn-primary' : 'btn-ghost'}" style="${activeRole !== 'user' ? 'color:var(--text-muted);' : ''}">User</button>
+                            <button id="tabAdmin" type="button" class="btn w-full ${activeRole === 'admin' ? 'btn-primary' : 'btn-ghost'}" style="${activeRole !== 'admin' ? 'color:var(--text-muted);' : ''}">Admin</button>
+                        </div>
+
+                        <form id="loginForm" class="flex flex-col gap-4">
+                            <div>
+                                <label class="label">User ID (Unique)</label>
+                                <input type="text" name="userid" class="input" placeholder="Enter ${activeRole === 'admin' ? 'Admin' : 'User'} ID" required>
+                            </div>
+                            <div style="position:relative;">
+                                <label class="label">Password</label>
+                                <input type="password" name="password" id="passInput" class="input" placeholder="••••••••" required style="padding-right: 40px;">
+                                <button type="button" id="togglePass" class="btn-icon" style="position:absolute; right:10px; top:32px;">
+                                    👁️
+                                </button>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-full" style="margin-top: 1rem;">Login as ${activeRole === 'admin' ? 'Admin' : 'User'}</button>
+                        </form>
+                        <div id="loginError" style="color: var(--danger); font-size: 0.9rem; margin-top: 1rem; text-align: center; display: none;"></div>
+                    `;
+
+                    // Bind Events
+                    box.querySelector('#tabUser').onclick = () => { activeRole = 'user'; updateForm(); };
+                    box.querySelector('#tabAdmin').onclick = () => { activeRole = 'admin'; updateForm(); };
+
+                    // Show/Hide Password
+                    const passInput = box.querySelector('#passInput');
+                    const toggleBtn = box.querySelector('#togglePass');
+                    toggleBtn.onclick = () => {
+                        if (passInput.type === 'password') {
+                            passInput.type = 'text';
+                            toggleBtn.innerText = '🔒'; // Icon change
+                        } else {
+                            passInput.type = 'password';
+                            toggleBtn.innerText = '👁️';
+                        }
+                    };
+
+                    box.querySelector('#loginForm').addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const uid = e.target.userid.value;
+                        const pass = e.target.password.value;
+                        const result = await State.login(uid, pass, activeRole);
+
+                        if (result.success) {
+                            this.render();
+                        } else {
+                            const err = box.querySelector('#loginError');
+                            err.style.display = 'block';
+                            err.innerText = result.error;
+                        }
+                    });
+                };
+
+                const card = document.createElement('div');
+                card.className = 'card login-box p-6';
+                container.appendChild(card);
+                this.app.appendChild(container);
+
+                updateForm();
+
+                // Theme Toggle (Login)
+                const themeBtn = document.createElement('button');
+                themeBtn.className = 'btn-icon';
+                themeBtn.style.position = 'absolute';
+                themeBtn.style.top = '20px';
+                themeBtn.style.right = '20px';
+                themeBtn.style.fontSize = '1.5rem';
+                themeBtn.innerText = State.theme === 'light' ? '☀️' : '🌙';
+                themeBtn.title = "Toggle Theme";
+                themeBtn.onclick = () => State.toggleTheme();
+                container.appendChild(themeBtn);
+            },
+
+            openFilterPanel(col, btn) {
+                // Close existing if any
+                const existing = document.querySelector('.filter-panel');
+                if (existing) existing.remove();
+
+                const panel = document.createElement('div');
+                panel.className = 'filter-panel';
+
+                // Position logic
+                const rect = btn.getBoundingClientRect();
+                panel.style.top = (rect.bottom + 5) + 'px';
+                panel.style.left = rect.left + 'px';
+
+                // Prevent overflow right
+                if (rect.left + 280 > window.innerWidth) {
+                    panel.style.left = (window.innerWidth - 290) + 'px';
+                }
+
+                // 1. Data Preparation
+                // Context-Aware Filter Values: Only show values allowed by OTHER filters
+                let sourceData = State.data;
+                if (State.activeTab.filters) {
+                    sourceData = State.data.filter(row => {
+                        return Object.entries(State.activeTab.filters).every(([k, allowed]) => {
+                            if (k === col.id) return true; // Ignore self
+                            if (!allowed) return true;
+                            // Re-use logic from filteredData getter (simple includes)
+                            const val = row[k];
+                            const checkVal = (val === undefined || val === null) ? '' : val;
+                            return allowed.includes(checkVal);
+                        });
+                    });
+                }
+
+                const allValues = [...new Set(sourceData.map(d => {
+                    const v = d[col.id];
+                    return (v === undefined || v === null) ? '' : v;
+                }))].sort(); // Sort alphanumerically
+
+                // Current Filter State
+                // If filter exists, checked = values in filter
+                // If filter doesn't exist, checked = ALL values
+                const currentFilter = State.activeTab.filters?.[col.id];
+                let checkedValues = currentFilter ? new Set(currentFilter) : new Set(allValues);
+
+                // Sort State
+                const currentSort = State.activeTab.sort;
+                const isSortAsc = currentSort?.colId === col.id && currentSort.direction === 'asc';
+                const isSortDesc = currentSort?.colId === col.id && currentSort.direction === 'desc';
+
+                // HTML Structure
+                panel.innerHTML = `
+                    <div class="filter-panel-header">
+                        <div id="filterDragHandle" style="font-weight:bold; font-size:0.95rem; text-align:center; padding-bottom:0.5rem; margin-bottom:0.5rem; border-bottom:1px solid var(--card-border); cursor:move; color:var(--primary); user-select:none;">
+                            Filter: ${col.label}
+                        </div>
+                        <button class="filter-sort-btn" id="btnSortAsc" style="${isSortAsc ? 'background:rgba(255,255,255,0.1); font-weight:bold;' : ''}">
+                            <span>🔼</span> Sort A to Z
+                        </button>
+                        <button class="filter-sort-btn" id="btnSortDesc" style="${isSortDesc ? 'background:rgba(255,255,255,0.1); font-weight:bold;' : ''}">
+                            <span>🔽</span> Sort Z to A
+                        </button>
+                        ${currentSort?.colId === col.id ? `
+                            <button class="filter-sort-btn" id="btnClearSort" style="color:var(--text-muted); border-top:1px solid var(--card-border); margin-top:0.25rem; padding-top:0.75rem;">
+                                <span>⟲</span> Clear Sort
+                            </button>
+                        ` : ''}
+                        ${currentFilter ? `
+                            <button class="filter-sort-btn" id="btnClearThis" style="color:var(--danger)">
+                                <span>✕</span> Clear Filter from "${col.label}"
+                            </button>
+                        ` : ''}
+                        <input type="text" class="filter-search" placeholder="Search..." id="filterSearch">
+                    </div>
+                    <div class="filter-list" id="filterList">
+                        <label class="filter-item">
+                            <input type="checkbox" id="chkSelectAll" ${currentFilter ? '' : 'checked'}>
+                            <span style="font-weight:600">(Select All)</span>
+                        </label>
+                        <div id="filterItemsContainer"></div>
+                    </div>
+                    <div class="filter-actions">
+                        <button class="btn btn-ghost" id="btnCancelFilter">Cancel</button>
+                        <button class="btn btn-primary" id="btnApplyFilter">OK</button>
+                    </div>
+                `;
+
+                // Render List Wrapper
+                const listContainer = panel.querySelector('#filterItemsContainer');
+                const renderList = (filterText = '') => {
+                    listContainer.innerHTML = '';
+                    const lowerFilter = filterText.toLowerCase();
+
+                    allValues.forEach(val => {
+                        const displayVal = val === '' ? '(Blanks)' : val; // Raw value
+                        // For display, maybe format?
+                        const formattedVal = Router.formatValue(val, col);
+                        const strVal = String(formattedVal);
+
+                        if (strVal.toLowerCase().includes(lowerFilter)) {
+                            const lbl = document.createElement('label');
+                            lbl.className = 'filter-item';
+                            // Checked logic: is it in the current DRAFT checked set?
+                            const isChecked = checkedValues.has(val);
+                            lbl.innerHTML = `
+                                <input type="checkbox" value="${String(val)}" ${isChecked ? 'checked' : ''}>
+                                <span style="margin-left:0.5rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${strVal === '' ? '(Blanks)' : strVal}</span>
+                            `;
+
+                            // Checkbox Change -> Update DRAFT Set
+                            lbl.querySelector('input').addEventListener('change', (e) => {
+                                if (e.target.checked) checkedValues.add(val);
+                                else checkedValues.delete(val);
+
+                                // Update Select All State
+                                const allChk = panel.querySelector('#chkSelectAll');
+                                if (checkedValues.size === allValues.length) {
+                                    allChk.checked = true;
+                                    allChk.indeterminate = false;
+                                } else if (checkedValues.size === 0) {
+                                    allChk.checked = false;
+                                    allChk.indeterminate = false;
+                                } else {
+                                    allChk.checked = false;
+                                    allChk.indeterminate = true;
+                                }
+                            });
+                            listContainer.appendChild(lbl);
+                        }
+                    });
+                };
+                renderList();
+
+                // Drag Logic
+                const dragHandle = panel.querySelector('#filterDragHandle');
+                let isDragging = false;
+                let startX, startY, initialLeft, initialTop;
+
+                dragHandle.addEventListener('mousedown', (e) => {
+                    isDragging = true;
+                    startX = e.clientX;
+                    startY = e.clientY;
+                    initialLeft = panel.offsetLeft;
+                    initialTop = panel.offsetTop;
+                    dragHandle.style.cursor = 'grabbing';
+                    e.preventDefault(); // Prevent text selection
+                });
+
+                document.addEventListener('mousemove', (e) => {
+                    if (!isDragging) return;
+                    const dx = e.clientX - startX;
+                    const dy = e.clientY - startY;
+                    panel.style.left = (initialLeft + dx) + 'px';
+                    panel.style.top = (initialTop + dy) + 'px';
+                });
+
+                document.addEventListener('mouseup', () => {
+                    if (isDragging) {
+                        isDragging = false;
+                        dragHandle.style.cursor = 'move';
+                    }
+                });
+
+                // Select All Handler
+                const chkSelectAll = panel.querySelector('#chkSelectAll');
+                // Set initial indeterminate state
+                if (checkedValues.size > 0 && checkedValues.size < allValues.length) chkSelectAll.indeterminate = true;
+
+                chkSelectAll.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        checkedValues = new Set(allValues);
+                        // Visually check all visible? Or all values? 
+                        // Excel: Select all selects matches of search, or all if no search. 
+                        // Simplification: Select All means ALL values in the column.
+                        renderList(panel.querySelector('#filterSearch').value);
+                    } else {
+                        checkedValues.clear();
+                        renderList(panel.querySelector('#filterSearch').value);
+                    }
+                });
+
+                // Search Handler
+                panel.querySelector('#filterSearch').addEventListener('input', (e) => {
+                    renderList(e.target.value);
+                });
+
+                // Actions
+                panel.querySelector('#btnSortAsc').onclick = () => { State.setSort(col.id, 'asc'); panel.remove(); };
+                panel.querySelector('#btnSortDesc').onclick = () => { State.setSort(col.id, 'desc'); panel.remove(); };
+
+                const btnClearSort = panel.querySelector('#btnClearSort');
+                if (btnClearSort) btnClearSort.onclick = () => {
+                    State.setSort(col.id, null); // Clear Sort Only
+                    panel.remove();
+                };
+
+                const btnClear = panel.querySelector('#btnClearThis');
+                if (btnClear) btnClear.onclick = () => {
+                    State.clearFilter(col.id);
+                    // Do NOT clear sort implicitly
+                    panel.remove();
+                };
+
+                panel.querySelector('#btnCancelFilter').onclick = () => panel.remove();
+
+                panel.querySelector('#btnApplyFilter').onclick = () => {
+                    // Logic:
+                    // If checkedValues == allValues, filter is REMOVED (or effectively all).
+                    // We save cleaner state if we just remove the filter property.
+                    if (checkedValues.size === allValues.length) {
+                        State.setFilter(col.id, null);
+                    } else {
+                        State.setFilter(col.id, Array.from(checkedValues));
+                    }
+                    panel.remove();
+                };
+
+                // Click Outside to Close
+                // Use a timeout to avoid immediate trigger from the button click
+                setTimeout(() => {
+                    const closeHandler = (e) => {
+                        if (!panel.contains(e.target) && !btn.contains(e.target)) {
+                            panel.remove();
+                            document.removeEventListener('click', closeHandler);
+                        }
+                    };
+                    document.addEventListener('click', closeHandler);
+                }, 10);
+
+                document.body.appendChild(panel);
+            },
+
+            renderDashboard() {
+                const isAdmin = State.currentUser.role === 'admin';
+
+                const container = document.createElement('div');
+                container.id = 'dashboard-view';
+
+                // HEADER & TABS
+                const header = document.createElement('header');
+                const tabsHtml = State.tabs.map(tab => `
+                    <button class="tab-btn ${tab.id === State.activeTabId ? 'active' : 'inactive'}" data-tab-id="${tab.id}">
+                        ${tab.name}
+                    </button>
+                `).join('');
+
+                header.innerHTML = `
+                    <div class="flex items-center gap-4" style="flex-shrink: 0;">
+                        <div style="width:40px; height:40px; background:linear-gradient(135deg, var(--gray-700), var(--gray-900)); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.2rem; color: #fff;">${State.currentUser.id[0].toUpperCase()}</div>
+                        <div>
+                            <h3 style="font-weight:600;">${State.currentUser.id}</h3>
+                            <span style="font-size:0.8rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">${State.currentUser.role}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- CENTER: TABS (Scrollable, Flex Grow) -->
+                    <div class="flex items-center gap-2 flex-1" style="min-width: 0; padding: 0 1rem; overflow: hidden; align-self: flex-end;">
+                         <div class="flex gap-1 items-center overflow-x-auto no-scrollbar" style="width: 100%; white-space: nowrap; padding-bottom: 0;">
+                            ${tabsHtml}
+                            
+                            ${State.tabs.length < 10
+                        ? `<button id="btnAddTab" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.85rem; margin-left:0.5rem; flex-shrink: 0;" title="New Sheet">+ New</button>`
+                        : `<span style="font-size:0.8rem; color:var(--text-muted); border:1px solid var(--card-border); padding:0.25rem 0.5rem; border-radius:4px; flex-shrink: 0;">Max 10 sheets</span>`
+                    }
+                            
+                            ${State.tabs.length > 1 ? `<button id="btnDelTab" class="btn-icon" style="padding: 0.25rem; font-size: 1.1rem; margin-left:0.5rem; flex-shrink: 0;" title="Delete Current Sheet">🗑️</button>` : ''}
+                        </div>
+                    </div>
+
+                    <!-- RIGHT: ACTIONS (Fixed) -->
+                    <div class="flex items-center gap-2" style="flex-shrink: 0; border-left: 1px solid var(--card-border); padding-left: 1rem;">
+                        <button id="btnTheme" class="btn-icon" style="font-size:1.2rem; margin-right:0.5rem;">${State.theme === 'light' ? '☀️' : '🌙'}</button>
+                        ${isAdmin ? `<button id="btnAdminSettings" class="btn btn-secondary">Settings</button>` : ''}
+                        <button id="btnLogout" class="btn btn-danger">Logout</button>
+                    </div>
+                `;
+
+                // Bind Header Events
+                header.querySelectorAll('button[data-tab-id]').forEach(btn => {
+                    btn.onclick = () => {
+                        // TAB GUARD
+                        if (State.selectedRows.size === 1) {
+                            // Check for dirty inputs? Or just generally warn if in edit mode?
+                            // Simple Guard: If in edit mode, warn.
+                            const form = document.getElementById('dataEntryForm');
+                            // Check if dirty class exists or just blindly warn
+                            const isDirty = form && form.querySelector('.is-dirty');
+                            if (isDirty) {
+                                if (!confirm("You have unsaved changes. Discard them and switch tabs?")) return;
+                                State.selectedRows.clear(); // Discard
+                            } else {
+                                // If not dirty but in edit mode, just clear selection silently? 
+                                // Or safer to just clear.
+                                State.selectedRows.clear();
+                            }
+                        }
+                        State.switchTab(btn.dataset.tabId);
+                    };
+                });
+                if (header.querySelector('#btnAddTab')) {
+                    header.querySelector('#btnAddTab').onclick = () => {
+                        let name = prompt("Enter Tab Name:", `Sheet ${State.tabs.length + 1}`);
+                        while (name && State.tabs.some(t => t.name.toLowerCase() === name.trim().toLowerCase())) {
+                            alert('Name already taken. Please try again.');
+                            name = prompt("Enter Tab Name:", `Sheet ${State.tabs.length + 1}`);
+                        }
+                        if (name && name.trim()) State.addTab(name.trim());
+                    };
+                }
+                if (header.querySelector('#btnDelTab')) {
+                    header.querySelector('#btnDelTab').onclick = () => State.deleteTab(State.activeTabId);
+                }
+                header.querySelector('#btnTheme').onclick = () => State.toggleTheme();
+                header.querySelector('#btnLogout').addEventListener('click', () => State.logout());
+                if (isAdmin) {
+                    header.querySelector('#btnAdminSettings').addEventListener('click', () => this.openAdminSettings());
+                }
+
+                // MAIN CONTENT
+                const main = document.createElement('div');
+                main.className = 'main-grid';
+
+                // -- LEFT PANEL: FORM --
+                const leftPanel = document.createElement('div');
+                leftPanel.className = 'card panel p-4';
+
+                const formHeader = document.createElement('div');
+                formHeader.className = 'panel-header';
+                formHeader.style.marginBottom = '0.5rem';
+                formHeader.innerHTML = `
+                    <div class="flex items-center gap-2">
+                         <span style="font-weight:bold; font-size:1.1rem; color:var(--primary);">${State.activeTab.name}</span>
+                         <button id="btnRenameTab" class="btn-icon" title="Rename Tab" style="font-size:0.9rem;">✏️</button>
+                         <button id="btnRowHeight" class="btn-icon" title="Row Height" style="font-size:0.9rem;">↕️</button>
+                    </div>
+                    <button class="btn btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.8rem;" id="btnAddCol">+ Column</button>
+                `;
+
+                formHeader.querySelector('#btnAddCol').addEventListener('click', () => this.openColumnModal());
+                formHeader.querySelector('#btnRenameTab').onclick = () => {
+                    let newName = prompt("Rename Tab:", State.activeTab.name);
+                    // Simple loop check for rename
+                    while (newName && State.tabs.some(t => t.id !== State.activeTabId && t.name.toLowerCase() === newName.trim().toLowerCase())) {
+                        alert('Name already taken.');
+                        newName = prompt("Rename Tab:", State.activeTab.name);
+                    }
+                    if (newName && newName.trim()) State.renameTab(newName.trim());
+                };
+
+                formHeader.querySelector('#btnRowHeight').onclick = () => {
+                    const current = State.activeTab.rowHeight || 50;
+                    const val = prompt("Enter Default Row Height (px):", current);
+                    if (val) {
+                        const num = parseInt(val);
+                        if (!isNaN(num) && num >= 20 && num <= 500) {
+                            State.activeTab.rowHeight = num;
+                            State.saveTabs();
+                            Router.render();
+                        } else if (val !== null) {
+                            alert("Please enter a valid number (20-500).");
+                        }
+                    }
+                };
+
+                const formContent = document.createElement('div');
+                formContent.className = 'form-content';
+                const entryForm = document.createElement('form');
+                entryForm.id = 'dataEntryForm';
+                entryForm.className = 'flex flex-col gap-4';
+
+                // EDIT MODE DETECTION
+                const isEditMode = State.selectedRows.size === 1;
+                let editRecordId = null;
+                let editRecordData = null;
+
+                if (isEditMode) {
+                    const idx = Array.from(State.selectedRows)[0];
+                    editRecordData = State.data[idx]; // Note: index matches data because we render in order (unless sorted later)
+                    // Wait, State.selectedRows tracks INDICES. 
+                    // Verify consistency: default renderer loops data by index.
+                    // If filtering/sorting existed, this would break. But currently it's direct mapping.
+                    if (editRecordData) {
+                        editRecordId = editRecordData.id;
+                        entryForm.dataset.mode = 'update';
+                        entryForm.dataset.id = editRecordId;
+
+                        // Visual Indicator
+                        formHeader.querySelector('span').innerText = `Editing Record`;
+                        formHeader.querySelector('span').style.color = 'var(--primary)';
+                    }
+                }
+
+                // Render Fields
+                if (State.schema.length === 0) {
+                    entryForm.innerHTML = `<p style="color:var(--text-muted); text-align:center; margin-top:2rem;">No columns defined. Add one to start.</p>`;
+                } else {
+                    State.schema.forEach((col, index) => {
+                        const fieldWrapper = document.createElement('div');
+                        let attrs = ''; // Default to optional
+                        if (col.options?.required) attrs += ' required'; // Only required if flag is set
+
+                        if (col.options?.maxLength) {
+                            // attrs += ` maxlength="${col.options.maxLength}"`; // REMOVED HARD LIMIT
+                        }
+                        if (col.options?.minVal !== undefined && col.options.minVal !== null && !isNaN(col.options.minVal)) attrs += ` min="${col.options.minVal}"`;
+                        if (col.options?.maxVal !== undefined && col.options.maxVal !== null && !isNaN(col.options.maxVal)) attrs += ` max="${col.options.maxVal}"`;
+
+                        if (col.type === 'date') {
+                            if (!col.options?.maxVal) attrs += ` max="9999-12-31"`;
+                        }
+
+                        // PRE-FILL VALUE IF EDITING
+                        let value = '';
+                        if (isEditMode && editRecordData) {
+                            value = editRecordData[col.id] || '';
+                        }
+
+                        // Drag & Drop Attributes
+                        fieldWrapper.draggable = true;
+                        fieldWrapper.style.cursor = 'move';
+                        fieldWrapper.addEventListener('dragstart', (e) => this.handleDragStart(e, index));
+                        fieldWrapper.addEventListener('dragover', this.handleDragOver);
+                        fieldWrapper.addEventListener('drop', (e) => this.handleDrop(e, index));
+
+                        fieldWrapper.innerHTML = `
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="label" style="margin-bottom:0;">
+                                    ${col.label}
+                                    ${col.options?.required ? '<span style="color:#ef4444; margin-left:0.1rem;">*</span>' : ''}
+                                </label>
+                                <div>
+                                    <button type="button" class="btn-icon edit-col-btn" title="Edit" style="margin-right:0.5rem; font-size:0.9rem;">✏️</button>
+                                    <button type="button" class="btn-icon delete-col-btn" data-id="${col.id}" style="font-size:1.1rem;">&times;</button>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <input type="${col.type}" name="${col.id}" class="input" ${attrs} value="${value.replace(/"/g, '&quot;')}">
+                                ${col.options?.maxLength ? `<div class="char-count text-muted text-xs text-right mt-1" style="font-size:0.75rem; text-align:right;">0 / ${col.options.maxLength}</div>` : ''}
+                            </div>
+                        `;
+
+                        // Add Blur Listener for Formatting & Dirty Check
+                        const input = fieldWrapper.querySelector('input');
+                        input.addEventListener('blur', (e) => this.handleInputBlur(e, col));
+
+                        // VALIDATION & DIRTY TRACKING
+                        const validateInput = () => {
+                            const val = input.value;
+                            let isValid = true;
+                            let msg = '';
+
+                            // Max Length
+                            if (col.options?.maxLength && val.length > col.options.maxLength) {
+                                isValid = false;
+                                msg = `Too long (${val.length}/${col.options.maxLength})`;
+                            }
+                            // Min Length
+                            if (col.options?.minLength && val.length < col.options.minLength && val.length > 0) {
+                                isValid = false;
+                                msg = `Too short (min ${col.options.minLength})`;
+                            }
+
+                            input.setCustomValidity(msg); // Blocks submit
+
+                            // Visuals
+                            const counter = fieldWrapper.querySelector('.char-count');
+                            if (counter) {
+                                counter.innerText = `${val.length} / ${col.options.maxLength}`;
+                                counter.style.color = isValid ? 'var(--text-muted)' : 'var(--danger)';
+                            }
+
+                            if (!isValid) input.classList.add('is-invalid');
+                            else input.classList.remove('is-invalid');
+
+                            // Dirty Check
+                            const originalVal = isEditMode && editRecordData ? (editRecordData[col.id] || '') : '';
+                            if (val != originalVal) input.classList.add('is-dirty');
+                            else input.classList.remove('is-dirty');
+                        };
+
+                        input.addEventListener('input', validateInput);
+                        // Run once init
+                        validateInput();
+
+                        // Handlers
+                        fieldWrapper.querySelector('.edit-col-btn').addEventListener('click', () => this.openColumnModal(col));
+                        fieldWrapper.querySelector('.delete-col-btn').addEventListener('click', (e) => {
+                            if (confirm(`Delete column "${col.label}"?`)) State.deleteColumn(col.id);
+                        });
+                        entryForm.appendChild(fieldWrapper);
+                    });
+
+                    const submitBtn = document.createElement('button');
+                    submitBtn.type = 'submit';
+                    submitBtn.className = isEditMode ? 'btn btn-secondary w-full' : 'btn btn-primary w-full';
+                    submitBtn.style.marginTop = '1rem';
+                    submitBtn.innerText = isEditMode ? 'Update Entry' : 'Add Entry';
+                    // Visual distinction for Update
+                    if (isEditMode) submitBtn.style.border = '1px solid var(--primary)';
+
+                    entryForm.appendChild(submitBtn);
+
+                    if (isEditMode) {
+                        const cancelBtn = document.createElement('button');
+                        cancelBtn.type = 'button';
+                        cancelBtn.className = 'btn btn-ghost w-full';
+                        cancelBtn.style.marginTop = '0.5rem';
+                        cancelBtn.innerText = 'Cancel Edit';
+                        cancelBtn.onclick = () => { State.selectedRows.clear(); Router.render(); };
+                        entryForm.appendChild(cancelBtn);
+                    }
+                }
+
+                // ENTER KEY NAVIGATION
+                entryForm.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        // Get visible inputs only
+                        const inputs = Array.from(entryForm.querySelectorAll('input:not([type="hidden"]):not([disabled])'));
+                        const index = inputs.indexOf(e.target);
+                        // If not the last input, move focus
+                        if (index > -1 && index < inputs.length - 1) {
+                            e.preventDefault();
+                            inputs[index + 1].focus();
+                        }
+                    }
+                });
+
+                entryForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    if (State.schema.length === 0) return;
+
+                    const formData = {};
+                    State.schema.forEach(col => {
+                        let val = e.target[col.id].value;
+                        if (col.type === 'text' && col.options?.autoTrim) {
+                            val = val.trim();
+                        }
+                        formData[col.id] = val;
+                    });
+
+                    try {
+                        if (e.target.dataset.mode === 'update') {
+                            State.updateEntry(parseInt(e.target.dataset.id), formData);
+                            this.showToast('Entry updated successfully');
+                        } else {
+                            State.addEntry(formData);
+                            e.target.reset();
+                            this.showToast('Entry added successfully');
+                        }
+                    } catch (err) {
+                        alert(err.message);
+                    }
+
+                    // POST-SUBMIT FOCUS RESET
+                    // Since render() destroys the form, we must re-query the new one.
+                    setTimeout(() => {
+                        const newForm = document.getElementById('dataEntryForm');
+                        if (newForm) {
+                            const firstInput = newForm.querySelector('input:not([type="hidden"]):not([disabled])');
+                            if (firstInput) firstInput.focus();
+                        }
+                    }, 0);
+                });
+
+                formContent.appendChild(entryForm);
+                leftPanel.appendChild(formHeader);
+                leftPanel.appendChild(formContent);
+
+                // -- RIGHT PANEL: TABLE --
+                const rightPanel = document.createElement('div');
+                rightPanel.className = 'card panel p-4';
+
+                // Use Filtered Data
+                const filteredData = State.filteredData; // Use the getter
+                const isFiltered = State.activeTab.filters && Object.keys(State.activeTab.filters).length > 0;
+
+                const tableHeader = document.createElement('div');
+                tableHeader.className = 'panel-header';
+                const selectedCount = State.selectedRows.size;
+
+                // Header Stats
+                let recordsLabel = `Records (${State.data.length})`;
+                if (filteredData.length !== State.data.length) {
+                    recordsLabel = `Records (${filteredData.length} of ${State.data.length})`;
+                }
+
+                tableHeader.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span>${recordsLabel}</span>
+                        ${selectedCount > 0 ? `<button id="btnDelSel" class="btn btn-danger" style="font-size:0.8rem; padding:0.2rem 0.5rem;">Delete Selected (${selectedCount})</button>` : ''}
+                    </div>
+                    <div class="flex gap-2 items-center">
+                        ${isFiltered ? `<button id="btnClearFilters" class="btn btn-ghost" style="font-size:0.8rem; color:var(--text-muted);">Clear Filters</button>` : ''}
+                        <button id="btnClearAll" class="btn btn-danger" style="font-size:0.8rem;">Clear All</button>
+                        
+                        <!-- Export Dropdown -->
+                        <div style="position:relative;">
+                            <button id="btnExportMenu" class="btn btn-secondary" style="font-size:0.8rem;">Export ▼</button>
+                            <div id="exportDropdown" style="display:none; position:absolute; right:0; top:110%; background:#1e293b; border:1px solid var(--card-border); border-radius:0.5rem; padding:0.5rem; min-width:160px; z-index:60; box-shadow:0 4px 12px rgba(0,0,0,0.5);">
+                                ${filteredData.length !== State.data.length ? `
+                                    <div style="font-size:0.75rem; color:var(--text-muted); padding:0.25rem 0.5rem; font-weight:600;">FILTERED (${filteredData.length})</div>
+                                    <button id="btnExpCsvFil" class="btn btn-secondary w-full" style="font-size:0.8rem; margin-bottom:0.25rem; text-align:left;">Export CSV</button>
+                                    <button id="btnExpJsonFil" class="btn btn-secondary w-full" style="font-size:0.8rem; margin-bottom:0.25rem; text-align:left;">Export JSON</button>
+                                    <button id="btnExpPdfFil" class="btn btn-secondary w-full" style="font-size:0.8rem; margin-bottom:0.5rem; text-align:left;">Export PDF</button>
+                                    <div style="border-top:1px solid var(--card-border); margin:0.25rem 0;"></div>
+                                    <div style="font-size:0.75rem; color:var(--text-muted); padding:0.25rem 0.5rem; font-weight:600;">ALL DATA (${State.data.length})</div>
+                                ` : ''}
+                                <button id="btnExpCsv" class="btn btn-secondary w-full" style="font-size:0.8rem; margin-bottom:0.25rem; text-align:left;">CSV</button>
+                                <button id="btnExpJson" class="btn btn-secondary w-full" style="font-size:0.8rem; margin-bottom:0.25rem; text-align:left;">JSON</button>
+                                <button id="btnExpPdf" class="btn btn-secondary w-full" style="font-size:0.8rem; text-align:left;">PDF</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Export Dropdown Logic
+                const menuBtn = tableHeader.querySelector('#btnExportMenu');
+                const menu = tableHeader.querySelector('#exportDropdown');
+
+                menuBtn.onclick = (e) => { e.stopPropagation(); menu.style.display = menu.style.display === 'none' ? 'block' : 'none'; };
+                document.onclick = () => { menu.style.display = 'none'; }; // Close on click outside
+                menu.onclick = (e) => e.stopPropagation();
+
+                // Standard Exports
+                tableHeader.querySelector('#btnExpCsv').addEventListener('click', () => { State.exportCSV(); menu.style.display = 'none'; });
+                tableHeader.querySelector('#btnExpJson').addEventListener('click', () => { State.exportJSON(); menu.style.display = 'none'; });
+                tableHeader.querySelector('#btnExpPdf').addEventListener('click', () => { State.exportPDF(); menu.style.display = 'none'; });
+
+                // Filtered Exports
+                if (filteredData.length !== State.data.length) {
+                    tableHeader.querySelector('#btnExpCsvFil').addEventListener('click', () => { State.exportCSV(filteredData); menu.style.display = 'none'; });
+                    tableHeader.querySelector('#btnExpJsonFil').addEventListener('click', () => { State.exportJSON(filteredData); menu.style.display = 'none'; });
+                    tableHeader.querySelector('#btnExpPdfFil').addEventListener('click', () => { State.exportPDF(filteredData); menu.style.display = 'none'; });
+                }
+
+                if (isFiltered) {
+                    tableHeader.querySelector('#btnClearFilters').addEventListener('click', () => State.clearAllFilters());
+                }
+
+                tableHeader.querySelector('#btnClearAll').addEventListener('click', () => {
+                    if (confirm("Are you sure you want to delete ALL records? This cannot be undone.")) State.clearAll();
+                });
+                if (selectedCount > 0) {
+                    tableHeader.querySelector('#btnDelSel').addEventListener('click', () => {
+                        if (confirm(`Delete ${selectedCount} selected records?`)) State.deleteSelected();
+                    });
+                }
+
+                const tableContainer = document.createElement('div');
+                tableContainer.className = 'table-container';
+
+                if (State.data.length === 0) {
+                    tableContainer.innerHTML = `<div style="padding:2rem; text-align:center; color:var(--text-muted);">No data entries found.</div>`;
+                } else {
+                    const table = document.createElement('table');
+
+                    // Table Head
+                    const thead = document.createElement('thead');
+                    const headerRow = document.createElement('tr');
+
+                    // Checkbox Col Header
+                    const thCheck = document.createElement('th');
+                    thCheck.style.width = '30px';
+                    // Indeterminate/Checked Logic for "Select All"
+                    // If filtered, Select All checks visible rows? 
+                    // Should we show check if ALL visible rows are checked?
+                    let allVisibleChecked = false;
+                    if (filteredData.length > 0) {
+                        const visibleIndices = filteredData.map(r => State.data.indexOf(r));
+                        allVisibleChecked = visibleIndices.every(idx => State.selectedRows.has(idx));
+                    }
+
+                    thCheck.innerHTML = `<input type="checkbox" ${filteredData.length > 0 && allVisibleChecked ? 'checked' : ''}>`;
+                    thCheck.querySelector('input').addEventListener('click', () => {
+                        // Custom Select All for Visible
+                        const visibleIndices = filteredData.map(r => State.data.indexOf(r));
+                        if (allVisibleChecked) {
+                            // Deselect visible
+                            visibleIndices.forEach(idx => State.selectedRows.delete(idx));
+                        } else {
+                            // Select visible
+                            visibleIndices.forEach(idx => State.selectedRows.add(idx));
+                        }
+                        Router.render();
+                    });
+                    headerRow.appendChild(thCheck);
+
+                    State.schema.forEach((col, index) => {
+                        const th = document.createElement('th');
+                        // Width Logic
+                        if (col.options?.width) th.style.width = col.options.width + 'px';
+
+                        // Content Wrapper
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'flex items-center justify-between';
+                        wrapper.style.cursor = 'move';
+                        wrapper.style.whiteSpace = 'nowrap';
+                        wrapper.style.overflow = 'hidden';
+                        wrapper.innerText = col.label;
+
+                        // Filter Icon
+                        const filterBtn = document.createElement('span');
+                        filterBtn.className = 'filter-icon';
+                        if (State.activeTab.filters?.[col.id] || State.activeTab.sort?.colId === col.id) {
+                            filterBtn.classList.add('active');
+                        }
+                        filterBtn.innerHTML = '▼';
+                        filterBtn.title = "Filter / Sort";
+                        filterBtn.onclick = (e) => {
+                            e.stopPropagation(); // Don't trigger drag
+                            this.openFilterPanel(col, filterBtn);
+                        };
+                        wrapper.appendChild(filterBtn);
+                        th.appendChild(wrapper);
+
+                        // Resize Handle
+                        const resizer = document.createElement('div');
+                        resizer.className = 'resize-handle';
+                        resizer.addEventListener('mousedown', (e) => this.initColResize(e, col));
+                        resizer.addEventListener('dblclick', (e) => this.autoFitColumn(col)); // Auto-Fit
+                        resizer.addEventListener('click', (e) => e.stopPropagation());
+                        th.appendChild(resizer);
+
+                        // Drag Drop Attributes
+                        th.draggable = true;
+                        th.addEventListener('dragstart', (e) => {
+                            if (this.isResizing) { e.preventDefault(); return; }
+                            this.handleDragStart(e, index)
+                        });
+                        th.addEventListener('dragover', this.handleDragOver);
+                        th.addEventListener('drop', (e) => this.handleDrop(e, index));
+
+                        headerRow.appendChild(th);
+                    });
+                    // Actions Col
+                    const thAction = document.createElement('th');
+                    thAction.style.width = '50px';
+                    headerRow.appendChild(thAction);
+                    thead.appendChild(headerRow);
+                    table.appendChild(thead);
+
+                    // Table Body
+                    const tbody = document.createElement('tbody');
+                    filteredData.forEach((row) => {
+                        // FIND TRUE INDEX
+                        const trueIndex = State.data.indexOf(row);
+
+                        const tr = document.createElement('tr');
+                        // Row Height
+                        const h = State.activeTab.rowHeight || 50;
+                        tr.style.height = `var(--dynamic-row-height, ${h}px)`;
+
+                        // EDIT HIGHLIGHT
+                        if (State.selectedRows.has(trueIndex) && State.selectedRows.size === 1) {
+                            tr.classList.add('editing-row');
+                        }
+
+                        // Checkbox Cell
+                        const tdCheck = document.createElement('td');
+                        tdCheck.style.position = 'relative'; // For handle positioning
+                        tdCheck.innerHTML = `<input type="checkbox" ${State.selectedRows.has(trueIndex) ? 'checked' : ''}>`;
+                        tdCheck.querySelector('input').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            State.toggleSelection(trueIndex);
+                        });
+
+                        // Row Resize Handle
+                        const rowResizer = document.createElement('div');
+                        rowResizer.className = 'row-resize-handle';
+                        rowResizer.addEventListener('mousedown', (e) => this.initRowResize(e));
+                        rowResizer.addEventListener('click', (e) => e.stopPropagation());
+                        tdCheck.appendChild(rowResizer);
+
+                        tr.appendChild(tdCheck);
+
+                        State.schema.forEach(col => {
+                            const td = document.createElement('td');
+                            const rawVal = row[col.id];
+                            td.innerText = this.formatValue(rawVal, col);
+
+                            // Width & Wrapping (Handled by TH and table-layout: fixed)
+                            // DO NOT set inline width on TD, it fights with TH resize
+                            if (col.options?.wrapText) {
+                                td.classList.add('cell-wrap');
+                            } else {
+                                td.classList.add('cell-nowrap');
+                            }
+
+                            tr.appendChild(td);
+                        });
+
+                        const tdAction = document.createElement('td');
+                        const delBtn = document.createElement('button');
+                        delBtn.innerHTML = '&times;';
+                        delBtn.className = 'btn-icon delete-row-btn';
+                        delBtn.style.padding = '0.2rem';
+                        delBtn.style.fontSize = '1.2rem';
+                        delBtn.onclick = () => { if (confirm('Delete row?')) State.deleteEntry(row.id); };
+                        tdAction.appendChild(delBtn);
+                        tr.appendChild(tdAction);
+
+                        tbody.appendChild(tr);
+                    });
+                    table.appendChild(tbody);
+                    tableContainer.appendChild(table);
+                }
+
+                rightPanel.appendChild(tableHeader);
+                rightPanel.appendChild(tableContainer);
+
+                // Append All
+                main.appendChild(leftPanel);
+                main.appendChild(rightPanel);
+
+                // Append All
+                main.appendChild(leftPanel);
+                main.appendChild(rightPanel);
+
+                container.appendChild(header);
+                container.appendChild(main);
+                this.app.appendChild(container);
+            },
+
+            openAdminSettings() {
+                const modal = document.createElement('div');
+                modal.className = 'modal-overlay';
+
+                const isDefaultAdmin = State.currentUser.adminType === 'default';
+
+                const renderModalContent = () => {
+                    // Default Admin checks IDs globally, so it must show the same account pool.
+                    // Custom Admins keep the existing partitioned user view.
+                    const myUsers = isDefaultAdmin
+                        ? State.users
+                        : State.users.filter(u => u.createdBy === State.currentUser.id);
+                    const ownedUsers = State.users.filter(u => u.createdBy === State.currentUser.id && u.role === 'user');
+                    const listTitle = isDefaultAdmin
+                        ? `All Accounts (${myUsers.length})`
+                        : `My Users (${ownedUsers.length} / 20)`;
+
+                    const userListHtml = myUsers.map(u => `
+                        <div class="flex justify-between items-center p-2" style="border-bottom:1px solid var(--card-border); padding: 0.75rem 0.5rem;">
+                            <div class="flex flex-col">
+                                <span style="font-weight:600; color:var(--text-main);">${u.id} <small style="color:var(--text-muted); margin-left:0.5rem;">${u.role === 'admin' ? '(Admin)' : ''}</small></span>
+                                <span style="font-size:0.75rem; color:var(--text-muted);">Pass: (Hidden)</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="btn-change-pass btn btn-ghost" style="padding:0.2rem 0.5rem; font-size:0.8rem;" data-id="${u.id}">Change Pass</button>
+                                <button class="btn-del-user btn btn-ghost" style="padding:0.2rem 0.5rem; color:var(--danger); font-size:0.8rem;" data-id="${u.id}">Delete</button>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    // CONDITIONAL HTML for Identity Section
+                    let identitySection = '';
+                    if (isDefaultAdmin) {
+                        identitySection = `
+                            <div class="mb-6 p-4" style="background:var(--gray-100); border:1px solid var(--card-border); border-left: 4px solid var(--danger); border-radius:4px;">
+                                <h4 class="mb-2" style="color:var(--danger); font-weight:700; font-size:1rem;">⚠️ Default Admin Mode</h4>
+                                <p style="font-size:0.9rem; color: var(--text-main); margin-bottom:1rem; opacity: 0.8;">
+                                    This factory account is for initial setup only.
+                                    <br>
+                                    <strong>Action Required:</strong> Create a Custom Admin below for daily operations.
+                                </p>
+                            </div>
+                            
+                            <!-- CREATE CUSTOM ADMIN -->
+                            <div class="mb-6">
+                                <h4 class="mb-4" style="color:var(--text-main); font-weight:700; font-size:1.1rem;">Create Custom Admin</h4>
+                                <form id="addCustomAdminForm" style="display:grid; grid-template-columns: 1fr 1fr auto; gap:1rem; align-items:end;">
+                                    <div>
+                                        <label class="label">New Admin ID</label>
+                                        <input name="uid" class="input" placeholder="e.g. superadmin" required>
+                                    </div>
+                                    <div>
+                                        <label class="label">Password</label>
+                                        <input name="pass" class="input" placeholder="••••••••" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary" style="height:42px;">Create Admin</button>
+                                </form>
+                            </div>
+                        `;
+                    } else {
+                        identitySection = `
+                            <div class="mb-6 p-4" style="background:var(--gray-100); border:1px solid var(--card-border); border-radius:8px;">
+                                <h4 class="mb-4" style="color:var(--text-main); font-weight:700; font-size:1.1rem;">My Identity</h4>
+                                
+                                <!-- Rename ID -->
+                                <form id="changeMyIdForm" style="display:grid; grid-template-columns: 1fr auto; gap:1rem; align-items:end; margin-bottom:1.5rem;">
+                                    <div>
+                                        <label class="label" style="font-size:0.9rem; margin-bottom:0.4rem; display:block; color:var(--text-muted);">Admin ID</label>
+                                        <input name="newId" class="input" style="width:100%;" placeholder="${State.currentUser.id}" value="${State.currentUser.id}" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-secondary" style="height:42px; font-size:0.9rem;">Rename ID</button>
+                                </form>
+
+                                <!-- Change Password -->
+                                <form id="changeMyPassForm" style="display:grid; grid-template-columns: 1fr auto; gap:1rem; align-items:end;">
+                                    <div>
+                                        <label class="label" style="font-size:0.9rem; margin-bottom:0.4rem; display:block; color:var(--text-muted);">New Password</label>
+                                        <input name="newPass" type="password" class="input" style="width:100%;" placeholder="••••••••" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-secondary" style="height:42px; font-size:0.9rem;">Update Pass</button>
+                                </form>
+                            </div>
+                        `;
+                    }
+
+                    modal.innerHTML = `
+                        <div class="card p-6" style="width: 600px; max-height: 85vh; overflow-y:auto; display:flex; flex-direction:column; background:var(--card-bg); border:1px solid var(--card-border); box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+                            <div class="flex justify-between items-center mb-6" style="border-bottom:1px solid var(--card-border); padding-bottom:1rem;">
+                                <h2 style="font-weight:700; font-size:1.25rem; color:var(--text-main);">Admin Settings</h2>
+                                <button type="button" id="btnCloseSettings" class="btn-icon" style="font-size:1.2rem;">&times;</button>
+                            </div>
+
+                            ${identitySection}
+
+                            <!-- USER MANAGEMENT SECTION -->
+                            <div>
+                                <h4 class="mb-4" style="color:var(--text-main); font-weight:700; font-size:1.1rem; margin-top:1rem;">User Management</h4>
+                                
+                                <form id="addUserForm" style="display:grid; grid-template-columns: 1fr 1fr auto; gap:1rem; align-items:end; margin-bottom:1.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--card-border);">
+                                    <div>
+                                        <label class="label">User ID</label>
+                                        <input name="uid" class="input" placeholder="e.g. jdoe" required>
+                                    </div>
+                                    <div>
+                                        <label class="label">Password</label>
+                                        <input name="pass" class="input" placeholder="••••••••" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary" style="height:42px;">Create User</button>
+                                </form>
+
+                                <!-- List -->
+                                <div>
+                                    <h5 class="mb-3" style="font-size:0.85rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">${listTitle}</h5>
+                                    <div id="userListContainer" style="max-height: 300px; overflow-y:auto; border:1px solid var(--card-border); border-radius:0.5rem; background:var(--bg-color);">
+                                        ${userListHtml.length ? userListHtml : '<div style="padding:1rem; text-align:center; color:var(--text-muted); font-style:italic;">No users created yet.</div>'}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    // Bind Events
+                    modal.querySelector('#btnCloseSettings').onclick = () => modal.remove();
+
+                    // Apply Theme Correctness for Warning Box in Dark Mode
+                    // In dark mode, var(--gray-100) is light. We need a dark neutral.
+                    // Since we can't do media queries in JS strings easily without class logic,
+                    // we rely on global variables. 
+                    // Let's assume var(--gray-100) is #f8f9fa. In dark mode effectively bright.
+                    // FIX: Inject a style block for the modal or use a class.
+                    const warningBox = modal.querySelector('.p-4[style*="--danger"]');
+                    if (warningBox && document.body.classList.contains('light-theme') === false) {
+                        warningBox.style.background = 'rgba(255,255,255,0.05)';
+                    }
+
+                    const identityBox = modal.querySelector('.p-4[style*="--gray-100"]');
+                    if (identityBox && document.body.classList.contains('light-theme') === false) {
+                        identityBox.style.background = 'rgba(255,255,255,0.05)';
+                    }
+
+                    // 1. ADD CUSTOM ADMIN (Default Admin Only)
+                    const addCustomAdminForm = modal.querySelector('#addCustomAdminForm');
+                    if (addCustomAdminForm) {
+                        addCustomAdminForm.addEventListener('submit', async (e) => {
+                            e.preventDefault();
+                            try {
+                                const uid = e.target.uid.value;
+                                const pass = e.target.pass.value;
+                                if (!uid.trim() || !pass.trim()) throw new Error("Fields cannot be empty");
+
+                                await State.addCustomAdmin(uid, pass);
+                                alert(`Custom Admin "${uid}" created successfully.`);
+                                e.target.reset();
+                                renderModalContent();
+                            } catch (err) { alert(err.message); }
+                        });
+                    }
+
+                    // 2. IDENTITY FORMS (Custom Admin Only)
+                    if (!isDefaultAdmin) {
+                        modal.querySelector('#changeMyIdForm').addEventListener('submit', async (e) => {
+                            e.preventDefault();
+                            const newId = e.target.newId.value;
+                            if (newId.trim() === '' || newId === State.currentUser.id) return;
+                            if (confirm(`Rename Admin ID to "${newId}"? This will migrate all your users.`)) {
+                                try {
+                                    const count = await State.updateAdminId(newId);
+                                    alert(`Admin renamed to ${newId}. ${count} users migrated.`);
+                                    modal.remove();
+                                    State.logout();
+                                    alert("Please log in with your new Admin ID.");
+                                } catch (err) { alert(err.message); }
+                            }
+                        });
+
+                        modal.querySelector('#changeMyPassForm').addEventListener('submit', async (e) => {
+                            e.preventDefault();
+                            const newPass = e.target.newPass.value;
+                            if (newPass.trim() === '') return;
+                            await State.updateUserPassword(State.currentUser.id, newPass);
+                            alert('Password Updated!');
+                            e.target.reset();
+                        });
+                    }
+
+                    // 3. ADD USER
+                    modal.querySelector('#addUserForm').addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        try {
+                            const uid = e.target.uid.value;
+                            const pass = e.target.pass.value;
+                            if (uid.trim() === '' || pass.trim() === '') throw new Error("Fields cannot be empty");
+
+                            await State.addUser(uid, pass);
+                            alert(`User ${uid} created.`);
+                            renderModalContent();
+                        } catch (err) {
+                            alert(err.message);
+                        }
+                    });
+
+                    // 4. CHANGE PASS (List)
+                    modal.querySelectorAll('.btn-change-pass').forEach(btn => {
+                        btn.onclick = async (e) => {
+                            const uid = e.target.getAttribute('data-id');
+                            const newP = prompt(`Enter new password for ${uid}:`);
+                            if (newP && newP.trim() !== '') {
+                                try {
+                                    await State.updateUserPassword(uid, newP);
+                                    alert(`Password for ${uid} updated.`);
+                                } catch (err) { alert(err.message); }
+                            }
+                        };
+                    });
+
+                    // 5. DELETE USER (List)
+                    modal.querySelectorAll('.btn-del-user').forEach(btn => {
+                        btn.onclick = (e) => {
+                            const uid = e.target.getAttribute('data-id');
+                            if (confirm(`Delete User ${uid}?`)) {
+                                try {
+                                    State.deleteUser(uid);
+                                    renderModalContent();
+                                } catch (err) { alert(err.message); }
+                            }
+                        };
+                    });
+                };
+                renderModalContent();
+                document.body.appendChild(modal);
+            },
+
+            openColumnModal(existingCol = null) {
+                const modal = document.createElement('div');
+                modal.className = 'modal-overlay';
+                const isEdit = !!existingCol;
+
+                // Modal HTML with Sectioned Layout
+                modal.innerHTML = `
+                    <div class="card p-6" style="width: 480px; max-height:90vh; overflow-y:auto;">
+                        <div class="flex justify-between items-center mb-6 pb-2" style="border-bottom:1px solid var(--card-border);">
+                            <h3 style="font-weight:700;">${isEdit ? 'Edit Column' : 'Add Column'}</h3>
+                            <button type="button" class="btn-icon" id="btnCancelX" style="font-size:1.2rem;">&times;</button>
+                        </div>
+
+                        <form id="addColForm" class="flex flex-col gap-5">
+                            
+                            <!-- BASIC INFO -->
+                            <div>
+                                <h4 style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.75rem; letter-spacing:1px; font-weight:700;">Basic Info</h4>
+                                <div class="flex gap-4">
+                                    <div class="flex-1">
+                                        <label class="label">Column Name</label>
+                                        <input name="label" class="input" placeholder="e.g. Revenue" value="${isEdit ? existingCol.label : ''}" required>
+                                    </div>
+                                    <div class="flex-1">
+                                        <label class="label">Data Type</label>
+                                        <select name="type" id="typeSelect" class="input" style="appearance:none; background-color:rgba(0,0,0,0.4);">
+                                            <option value="text" ${isEdit && existingCol.type === 'text' ? 'selected' : ''} style="background:#1e293b; color:white;">Text</option>
+                                            <option value="number" ${isEdit && existingCol.type === 'number' ? 'selected' : ''} style="background:#1e293b; color:white;">Number</option>
+                                            <option value="date" ${isEdit && existingCol.type === 'date' ? 'selected' : ''} style="background:#1e293b; color:white;">Date</option>
+                                            <option value="email" ${isEdit && existingCol.type === 'email' ? 'selected' : ''} style="background:#1e293b; color:white;">Email</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <small id="colNameError" style="color:var(--danger); display:none; margin-top:0.25rem;">Column name already exists.</small>
+                            </div>
+
+                            <!-- DYNAMIC CONFIGURATION -->
+                            <div id="configSection" style="display:none;">
+                                <h4 style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.75rem; letter-spacing:1px; font-weight:700; border-top:1px solid var(--card-border); padding-top:1rem;">Configuration</h4>
+                                <div id="dynamicOptions"></div>
+                            </div>
+
+                            <!-- VALIDATION -->
+                            <div>
+                                <h4 style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.75rem; letter-spacing:1px; font-weight:700; border-top:1px solid var(--card-border); padding-top:1rem;">Validation Rules</h4>
+                                
+                                <div class="flex gap-4 mb-3">
+                                    <div class="flex-1">
+                                        <label class="label">Min Length</label>
+                                        <input name="minLength" type="number" class="input" placeholder="0" value="${isEdit && existingCol.options?.minLength ? existingCol.options.minLength : ''}">
+                                    </div>
+                                    <div class="flex-1">
+                                        <label class="label">Max Length</label>
+                                        <input name="maxLength" type="number" class="input" placeholder="No Limit" value="${isEdit && existingCol.options?.maxLength ? existingCol.options.maxLength : ''}">
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4 p-3" style="background:rgba(0,0,0,0.2); border-radius:8px;">
+                                    <label class="flex items-center gap-2 cursor-pointer select-none">
+                                        <input type="checkbox" name="required" ${isEdit && existingCol.options?.required ? 'checked' : ''} style="width:16px; height:16px; accent-color:var(--primary);">
+                                        <span style="color:var(--text-main); font-size:0.9rem;">Required Field</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer select-none">
+                                        <input type="checkbox" name="unique" ${isEdit && existingCol.options?.unique ? 'checked' : ''} style="width:16px; height:16px; accent-color:var(--primary);">
+                                        <span style="color:var(--text-main); font-size:0.9rem;">Unique Values</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-3 justify-end mt-4 pt-4 border-t border-gray-700">
+                                <button type="button" class="btn btn-ghost" id="btnCancel">Cancel</button>
+                                <button type="submit" id="btnSubmitCol" class="btn btn-primary px-6">Save Column</button>
+                            </div>
+                        </form>
+                    </div>
+                `;
+
+                // Logic to update dynamic fields
+                const typeSelect = modal.querySelector('#typeSelect');
+                const dynamicOptions = modal.querySelector('#dynamicOptions');
+                const configSection = modal.querySelector('#configSection');
+
+                const updateOptions = () => {
+                    const type = typeSelect.value;
+                    let html = '';
+                    const opts = isEdit ? existingCol.options || {} : {};
+
+                    if (type === 'text') {
+                        html = `
+                            <div>
+                                <label class="label">Text Parsing</label>
+                                <select name="casing" class="input" style="appearance:none; background-color:rgba(0,0,0,0.4);">
+                                    <option value="none" ${opts.casing === 'none' ? 'selected' : ''} style="background:#1e293b; color:white;">Check Casing (None)</option>
+                                    <option value="upper" ${opts.casing === 'upper' ? 'selected' : ''} style="background:#1e293b; color:white;">UPPER CASE</option>
+                                    <option value="lower" ${opts.casing === 'lower' ? 'selected' : ''} style="background:#1e293b; color:white;">lower case</option>
+                                    <option value="title" ${opts.casing === 'title' ? 'selected' : ''} style="background:#1e293b; color:white;">Title Case (Proper Name)</option>
+                                </select>
+                            </div>
+                            <div class="mt-4 flex flex-col gap-2">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" name="autoTrim" ${opts.autoTrim ? 'checked' : ''} style="width:18px; height:18px; accent-color:var(--primary);">
+                                    <span style="color:var(--text); font-size:0.9rem;">Auto Trim Whitespace</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" name="wrapText" ${opts.wrapText ? 'checked' : ''} style="width:18px; height:18px; accent-color:var(--primary);">
+                                    <span style="color:var(--text); font-size:0.9rem;">Wrap Text</span>
+                                </label>
+                            </div>
+                        `;
+                    } else if (type === 'number') {
+                        html = `
+                            <div>
+                                <label class="label">Number Format</label>
+                                <select name="numFormat" id="numFormat" class="input" style="appearance:none; background-color:rgba(0,0,0,0.4);">
+                                    <option value="none" ${opts.numFormat === 'none' ? 'selected' : ''} style="background:#1e293b; color:white;">General (123)</option>
+                                    <option value="currency" ${opts.numFormat === 'currency' ? 'selected' : ''} style="background:#1e293b; color:white;">Currency ($123.00)</option>
+                                    <option value="decimal" ${opts.numFormat === 'decimal' ? 'selected' : ''} style="background:#1e293b; color:white;">Decimal (123.00)</option>
+                                </select>
+                            </div>
+                            <div class="mt-2">
+                                <label class="label">Decimal Places</label>
+                                <input name="decimalPlaces" type="number" min="0" max="10" class="input" placeholder="2" value="${opts.decimalPlaces !== undefined ? opts.decimalPlaces : ''}">
+                            </div>
+                            <div class="flex gap-2 mt-2">
+                                <div class="w-full">
+                                    <label class="label">Min Value</label>
+                                    <input name="minVal" type="number" class="input" placeholder="e.g. 0" value="${opts.minVal !== undefined ? opts.minVal : ''}">
+                                </div>
+                                <div class="w-full">
+                                    <label class="label">Max Value</label>
+                                    <input name="maxVal" type="number" class="input" placeholder="e.g. 100" value="${opts.maxVal !== undefined ? opts.maxVal : ''}">
+                                </div>
+                            </div>
+                            <div id="currencyCodeBox" class="${opts.numFormat === 'currency' ? '' : 'hidden'} mt-2">
+                                <label class="label">Currency Code</label>
+                                <select name="currency" class="input" style="appearance:none; background-color:rgba(0,0,0,0.4);">
+                                    <option value="USD" ${opts.currency === 'USD' ? 'selected' : ''} style="background:#1e293b; color:white;">USD ($)</option>
+                                    <option value="INR" ${opts.currency === 'INR' ? 'selected' : ''} style="background:#1e293b; color:white;">INR (₹)</option>
+                                    <option value="EUR" ${opts.currency === 'EUR' ? 'selected' : ''} style="background:#1e293b; color:white;">EUR (€)</option>
+                                    <option value="GBP" ${opts.currency === 'GBP' ? 'selected' : ''} style="background:#1e293b; color:white;">GBP (£)</option>
+                                </select>
+                            </div>
+                        `;
+                    } else if (type === 'date') {
+                        html = `
+                            <div>
+                                <label class="label">Date Format</label>
+                                <select name="dateFormat" class="input" style="appearance:none; background-color:rgba(0,0,0,0.4);">
+                                    <option value="short" ${opts.dateFormat === 'short' ? 'selected' : ''} style="background:#1e293b; color:white;">Short (1/31/2026)</option>
+                                    <option value="long" ${opts.dateFormat === 'long' ? 'selected' : ''} style="background:#1e293b; color:white;">Long (January 31, 2026)</option>
+                                    <option value="iso" ${opts.dateFormat === 'iso' ? 'selected' : ''} style="background:#1e293b; color:white;">ISO (2026-01-31)</option>
+                                </select>
+                            </div>
+                        `;
+                    }
+                    dynamicOptions.innerHTML = html;
+
+                    // Attach listener for Number Format change
+                    if (type === 'number') {
+                        const numFmt = modal.querySelector('#numFormat');
+                        const currBox = modal.querySelector('#currencyCodeBox');
+                        if (numFmt) {
+                            numFmt.addEventListener('change', () => {
+                                if (numFmt.value === 'currency') currBox.classList.remove('hidden');
+                                else currBox.classList.add('hidden');
+                            });
+                        }
+                    }
+
+                    if (html) configSection.style.display = 'block';
+                    else configSection.style.display = 'none';
+                };
+
+                // Init with default
+                updateOptions();
+                typeSelect.addEventListener('change', updateOptions);
+
+                // --- VALIDATION LOGIC ---
+                const labelInput = modal.querySelector('input[name="label"]');
+                const errorSpan = modal.querySelector('#colNameError');
+                const submitBtn = modal.querySelector('#btnSubmitCol');
+
+                labelInput.addEventListener('input', () => {
+                    const val = labelInput.value.trim().toLowerCase();
+                    const duplicate = State.schema.some(col =>
+                        col.label.trim().toLowerCase() === val &&
+                        (!isEdit || col.id !== existingCol.id) // Ignore self if editing
+                    );
+
+                    if (duplicate) {
+                        errorSpan.style.display = 'block';
+                        submitBtn.disabled = true;
+                        submitBtn.style.opacity = '0.5';
+                    } else {
+                        errorSpan.style.display = 'none';
+                        submitBtn.disabled = false;
+                        submitBtn.style.opacity = '1';
+                    }
+                });
+
+                modal.querySelector('#btnCancel').addEventListener('click', () => modal.remove());
+                if (modal.querySelector('#btnCancelX')) modal.querySelector('#btnCancelX').addEventListener('click', () => modal.remove());
+
+                modal.querySelector('#addColForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+
+                    const label = e.target.label.value;
+                    const type = e.target.type.value;
+                    const maxLength = e.target.maxLength.value ? parseInt(e.target.maxLength.value) : null;
+                    const minLength = e.target.minLength.value ? parseInt(e.target.minLength.value) : null;
+                    const required = e.target.required.checked;
+                    const unique = e.target.unique.checked;
+                    const options = { maxLength, minLength, required, unique };
+
+                    if (type === 'text') {
+                        options.casing = e.target.casing.value;
+                        options.autoTrim = e.target.autoTrim.checked;
+                        options.wrapText = e.target.wrapText.checked;
+                    }
+                    else if (type === 'number') {
+                        options.numFormat = e.target.numFormat.value;
+                        options.decimalPlaces = e.target.decimalPlaces.value;
+                        if (options.numFormat === 'currency') options.currency = e.target.currency.value;
+
+                        const min = e.target.minVal.value;
+                        const max = e.target.maxVal.value;
+                        if (min !== '') options.minVal = parseFloat(min);
+                        if (max !== '') options.maxVal = parseFloat(max);
+                    }
+                    else if (type === 'date') {
+                        options.dateFormat = e.target.dateFormat.value;
+                    }
+
+                    try {
+                        if (isEdit) {
+                            State.updateColumn(existingCol.id, label, type, options);
+                        } else {
+                            State.addColumn(label, type, options);
+                        }
+                        modal.remove();
+                    } catch (err) {
+                        alert(err.message); // Fallback for backend check
+                    }
+                });
+
+                document.body.appendChild(modal);
+            },
+
+            showToast(msg) {
+                const t = document.createElement('div');
+                t.className = 'toast';
+                t.innerText = msg;
+                document.body.appendChild(t);
+                setTimeout(() => t.remove(), 2500);
+            }
+        };
+
+        // --- BOOTSTRAP ---
+        // --- BOOTSTRAP ---
+        document.addEventListener('DOMContentLoaded', () => {
+            State.applyTheme();
+            Router.init();
+        });
+
+    </script>
+</body>
+
+</html>
